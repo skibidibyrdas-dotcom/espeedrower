@@ -1,87 +1,57 @@
 <!doctype html>
 <html lang="pl">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Speedrower Junior</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Speedrower Junior — final</title>
 <style>
 :root{
-  --bg:#050506;
-  --card:#0d0f10;
-  --muted:#9aa0a6;
-  --accent1:#7ff08a; /* neon green */
-  --accent2:#b070ff; /* neon purple */
-  --glass: rgba(255,255,255,0.03);
-  --glass-2: rgba(255,255,255,0.02);
-  --radius:14px;
-  --maxwidth:1100px;
-  --accent-contrast: #081012;
+  --bg:#050506; --card:#0d0f10; --muted:#9aa0a6;
+  --accent1:#7ff08a; --accent2:#b070ff; --glass: rgba(255,255,255,0.03);
+  --radius:12px; --maxw:1100px; --text-dark:#071011;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:linear-gradient(180deg,#020203,var(--bg));color:#eef3f6;min-height:100vh}
-.ribbon{max-width:var(--maxwidth);margin:18px auto 0;padding:14px;border-radius:14px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:var(--accent-contrast);display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 12px 40px rgba(0,0,0,0.5);letter-spacing:0.6px}
-.header{max-width:var(--maxwidth);margin:14px auto;padding:18px 14px;border-radius:12px;display:flex;align-items:center;gap:12px}
-.brand h1{margin:0;color:#ffffff;font-size:20px}
-.lead{color:var(--muted);font-size:13px;margin-top:6px}
-
-/* top nav */
-.topbar{max-width:var(--maxwidth);margin:6px auto;padding:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.navbtn{background:transparent;border:1px solid var(--glass-2);color:inherit;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700;backdrop-filter: blur(2px);transition:all 200ms ease}
-.navbtn:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,0.5);background:linear-gradient(90deg, rgba(127,240,138,0.04), rgba(176,112,255,0.04))}
-
-/* layout */
-.container{max-width:var(--maxwidth);margin:18px auto;padding:12px;display:grid;grid-template-columns:1fr 360px;gap:16px}
-@media(max-width:980px){.container{grid-template-columns:1fr} .top-actions{flex-direction:column}}
+.ribbon{max-width:var(--maxw);margin:18px auto 0;padding:14px;border-radius:12px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:var(--text-dark);display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,0.45)}
+.subribbons{max-width:var(--maxw);margin:10px auto;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:0 10px}
+.subr{flex:1;min-width:180px;background:linear-gradient(90deg,rgba(127,240,138,0.06),rgba(176,112,255,0.06));padding:12px;border-radius:10px;text-align:center;border:1px solid rgba(255,255,255,0.02);cursor:pointer;transition:transform 160ms}
+.subr:hover{transform:translateY(-6px)}
+.subr .title{font-weight:800;color:#fff}
+.container{max-width:var(--maxw);margin:18px auto;padding:12px;display:grid;grid-template-columns:1fr 360px;gap:16px}
+@media(max-width:980px){.container{grid-template-columns:1fr}}
 .card{background:var(--card);padding:14px;border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,0.6);border:1px solid var(--glass)}
-.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.muted{color:var(--muted);font-size:14px}
-.grid-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
-
-/* club card */
-.club-card{padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid var(--glass-2);cursor:pointer;transition:transform 180ms ease,box-shadow 180ms ease}
-.club-card:hover{transform:translateY(-6px);box-shadow:0 18px 50px rgba(0,0,0,0.6)}
-
-/* news */
+.topbar{max-width:var(--maxw);margin:6px auto;padding:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.navbtn{background:transparent;border:1px solid rgba(255,255,255,0.02);color:inherit;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:700}
 .news-card{border-left:4px solid var(--accent2);padding:12px;border-radius:8px;background:linear-gradient(180deg, rgba(176,112,255,0.03), transparent);margin-bottom:12px}
 .news-images{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.news-images img{max-width:160px;border-radius:8px;cursor:pointer;border:1px solid var(--glass-2);transition:transform 160ms ease}
+.news-images img{max-width:140px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.03);transition:transform 140ms}
 .news-images img:hover{transform:scale(1.03)}
-
-/* table */
+.input,textarea,select{width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);background:transparent;color:inherit;margin-top:8px}
+.btn{font-weight:800;border-radius:10px;padding:9px 14px;border:none;cursor:pointer;background:var(--accent1);color:var(--text-dark)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.02);color:inherit;padding:8px 12px;border-radius:8px;cursor:pointer}
 .table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{padding:10px;border-bottom:1px dashed rgba(255,255,255,0.03);text-align:left}
 th{color:var(--muted);font-weight:700}
-
-/* inputs */
-.input,textarea,select{width:100%;padding:9px;border-radius:10px;border:1px solid var(--glass-2);background:transparent;color:inherit;margin-top:8px}
-.btn{font-weight:800;border-radius:10px;padding:9px 14px;border:none;cursor:pointer;background:var(--accent1);color:var(--accent-contrast)}
-.btn-ghost{background:transparent;border:1px solid var(--glass-2);color:inherit;padding:8px 12px;border-radius:8px;cursor:pointer}
-
-/* modal */
 .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999}
 .modal-box{background:var(--card);padding:16px;border-radius:12px;max-width:980px;width:94%;max-height:90%;overflow:auto;border:1px solid var(--glass)}
-
-/* lightbox */
-.lightbox{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.9);z-index:10000}
+.lightbox{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);z-index:10000}
 .lightbox img{max-width:95%;max-height:90%;border-radius:8px}
-
-/* small */
 .small{font-size:13px;color:var(--muted)}
 .hint{font-size:12px;color:var(--muted);margin-top:8px}
-.footer{max-width:var(--maxwidth);margin:26px auto;padding:12px;text-align:center;color:var(--muted);font-size:13px}
 .fade-enter{animation:fadeIn 260ms ease both}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.footer{max-width:var(--maxw);margin:26px auto;padding:12px;text-align:center;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
 
 <div class="ribbon">Speedrower Junior — młodzi, szybcy, pełni pasji</div>
 
-<div class="header">
-  <div class="brand">
-    <h1>Speedrower Junior</h1>
-    <div class="lead">Oficjalna strona ligi młodzieżowej</div>
-  </div>
+<!-- BANNERY Z NAPISAMI — POPRAWIONE -->
+<div class="subribbons" id="subribbons">
+  <div class="subr" data-key="info" title="Ogłoszenia"><div class="title">Ogłoszenia</div><div class="small">Ważne komunikaty dla zawodników i rodziców</div></div>
+  <div class="subr" data-key="organizator" title="Wejście organizatora"><div class="title">Organizator</div><div class="small">Sekcja dla osób prowadzących ligę</div></div>
+  <div class="subr" data-key="trener" title="Dla trenerów"><div class="title">Dla trenerów</div><div class="small">Materiały i szkolenia</div></div>
 </div>
 
 <div class="topbar">
@@ -98,39 +68,39 @@ th{color:var(--muted);font-weight:700}
 <div class="container">
   <main>
     <section id="home" class="card view fade-enter">
-      <div class="section-title"><h2 style="margin:0;color:var(--accent1)">Witaj</h2></div>
-      <p class="muted">Przeglądaj aktualności, terminarz i profile klubów. Zalogowani organizatorzy mogą zarządzać zawartością.</p>
+      <h2 style="margin:0;color:var(--accent1)">Witaj</h2>
+      <p class="small">Przeglądaj aktualności, terminarz i profile klubów. Zalogowani organizatorzy mają dodatkowe opcje.</p>
     </section>
 
     <section id="aktualnosci" class="card view" style="display:none">
-      <div class="section-title"><h2 style="margin:0;color:var(--accent2)">Aktualności</h2></div>
+      <h2 style="margin:0;color:var(--accent2)">Aktualności</h2>
       <div id="newsContainer" style="margin-top:12px"></div>
     </section>
 
     <section id="categories" class="card view" style="display:none">
-      <div class="section-title"><h2 style="margin:0">Kategorie</h2></div>
+      <h2 style="margin:0">Kategorie</h2>
       <div id="categoriesList" style="margin-top:12px"></div>
     </section>
 
     <section id="clubs" class="card view" style="display:none">
-      <div class="section-title"><h2 style="margin:0">Kluby</h2></div>
-      <div id="clubsList" class="grid-col" style="margin-top:12px"></div>
+      <h2 style="margin:0">Kluby</h2>
+      <div id="clubsList" style="margin-top:12px"></div>
     </section>
 
     <section id="schedule" class="card view" style="display:none">
-      <div class="section-title"><h2 style="margin:0">Terminarz</h2></div>
+      <h2 style="margin:0">Terminarz</h2>
       <div id="scheduleList" style="margin-top:12px"></div>
     </section>
 
     <section id="standings" class="card view" style="display:none">
-      <div class="section-title"><h2 style="margin:0">Tabela</h2></div>
+      <h2 style="margin:0">Tabela</h2>
       <div id="standingsTable" style="margin-top:12px"></div>
     </section>
 
     <section id="contact" class="card view" style="display:none">
-      <div class="section-title"><h2 style="margin:0">Kontakt</h2></div>
+      <h2 style="margin:0">Kontakt</h2>
       <div style="margin-top:10px">
-        <p class="muted">W sprawach organizacyjnych:</p>
+        <p class="small">W sprawach organizacyjnych:</p>
         <p>📞 <strong>792 606 955</strong></p>
         <p>📧 <strong><a href="mailto:espeedrower@gmail.com" style="color:var(--accent1)">espeedrower@gmail.com</a></strong></p>
       </div>
@@ -147,7 +117,7 @@ th{color:var(--muted);font-weight:700}
 
     <div class="card">
       <div class="small">Szybkie akcje</div>
-      <div class="actions top-actions" style="margin-top:10px">
+      <div style="margin-top:10px;display:flex;gap:8px;flex-direction:column">
         <button class="btn" data-target="aktualnosci">Aktualności</button>
         <button class="btn" data-target="clubs">Kluby</button>
         <button class="btn" data-target="schedule">Terminarz</button>
@@ -156,21 +126,30 @@ th{color:var(--muted);font-weight:700}
 
     <div class="card">
       <div class="small">Backup</div>
-      <div class="actions" style="margin-top:10px">
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
         <button id="exportBtn" class="btn">Pobierz JSON</button>
         <label class="btn-ghost" style="cursor:pointer"><input id="importFile" type="file" accept=".json" style="display:none"/>Import JSON</label>
       </div>
-      <div class="hint">Reset znajdziesz w Panelu organizatora</div>
+      <div class="hint">Reset w Panelu organizatora</div>
     </div>
   </aside>
 </div>
 
+<!-- modal dla banneru (pokazuje napis/treść) -->
+<div id="bannerModal" class="modal" style="display:none">
+  <div class="modal-box">
+    <h3 id="bannerTitle" style="margin:0;color:var(--accent1)"></h3>
+    <p id="bannerBody" class="small" style="margin-top:8px"></p>
+    <div style="text-align:right;margin-top:12px"><button id="closeBanner" class="btn-ghost">Zamknij</button></div>
+  </div>
+</div>
+
 <!-- login modal -->
-<div id="loginModal" class="modal" style="display:none"><div class="modal-box fade-enter">
+<div id="loginModal" class="modal" style="display:none"><div class="modal-box">
   <h3 style="margin:0;color:var(--accent1)">Panel organizatora</h3>
-  <p class="muted">Podaj hasło, aby zarządzać ligą.</p>
+  <p class="small">Podaj hasło, aby zarządzać ligą.</p>
   <input id="loginPassword" type="password" class="input" placeholder="Hasło"/>
-  <div class="actions"><button id="loginSubmit" class="btn">Zaloguj</button><button id="loginCancel" class="btn-ghost">Anuluj</button></div>
+  <div style="margin-top:10px"><button id="loginSubmit" class="btn">Zaloguj</button><button id="loginCancel" class="btn-ghost">Anuluj</button></div>
 </div></div>
 
 <!-- admin panel -->
@@ -181,7 +160,7 @@ th{color:var(--muted);font-weight:700}
       <div><button id="closeAdminBtn" class="btn-ghost">Zamknij</button></div>
     </div>
 
-    <hr style="border:none;border-top:1px solid var(--glass);margin:10px 0"/>
+    <hr style="border:none;border-top:1px solid rgba(255,255,255,0.02);margin:10px 0"/>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="card" style="padding:12px">
@@ -194,7 +173,7 @@ th{color:var(--muted);font-weight:700}
         <input id="clubRoster" class="input" placeholder="Skład (oddziel przecinkami)"/>
         <label class="small">Kategorie (Ctrl/⌘ + klik)</label>
         <select id="clubCategories" multiple size="4" class="input"><option>U10</option><option>U13</option><option>U16</option><option>U18</option></select>
-        <div class="actions"><button id="saveClubBtn" class="btn">Zapisz klub</button><button id="clearClubBtn" class="btn-ghost">Wyczyść</button></div>
+        <div class="actions" style="margin-top:10px"><button id="saveClubBtn" class="btn">Zapisz klub</button><button id="clearClubBtn" class="btn-ghost">Wyczyść</button></div>
       </div>
 
       <div class="card" style="padding:12px">
@@ -210,54 +189,71 @@ th{color:var(--muted);font-weight:700}
           <input id="matchHomeGoals" class="input" type="number" min="0" placeholder="Gospodarze - pkt" style="width:48%"/>
           <input id="matchAwayGoals" class="input" type="number" min="0" placeholder="Goście - pkt" style="width:48%"/>
         </div>
-        <div class="actions"><button id="saveMatchBtn" class="btn">Dodaj / Zapisz</button><button id="clearMatchBtn" class="btn-ghost">Wyczyść</button></div>
+        <div class="actions" style="margin-top:10px"><button id="saveMatchBtn" class="btn">Dodaj / Zapisz</button><button id="clearMatchBtn" class="btn-ghost">Wyczyść</button></div>
       </div>
 
       <div class="card" style="grid-column:1 / -1;padding:12px">
-        <h4 style="margin:0">Dodaj aktualność (możesz dołączyć zdjęcia)</h4>
+        <h4 style="margin:0">Dodaj aktualność (ze zdjęciami)</h4>
         <input id="newsTitle" class="input" placeholder="Tytuł"/>
         <textarea id="newsBody" class="input" rows="3" placeholder="Treść aktualności"></textarea>
         <input id="newsImages" class="input" type="file" accept="image/*" multiple/>
-        <div class="actions"><button id="addNewsBtn" class="btn">Dodaj aktualność</button></div>
-        <div class="hint">Zdjęcia będą przechowane w przeglądarce jako pliki (data-URL). Uważaj na duże pliki.</div>
+        <div class="actions" style="margin-top:10px"><button id="addNewsBtn" class="btn">Dodaj aktualność</button></div>
+        <div class="hint">Obrazy zapisują się lokalnie (data-URL). Unikaj bardzo dużych plików.</div>
       </div>
     </div>
 
-    <hr style="border:none;border-top:1px solid var(--glass);margin:10px 0"/>
+    <hr style="border:none;border-top:1px solid rgba(255,255,255,0.02);margin:10px 0"/>
 
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button id="exportBtn2" class="btn">Export JSON</button>
       <label class="btn-ghost" style="cursor:pointer;padding:8px 10px;border-radius:8px;">Import JSON<input id="importFile2" type="file" accept=".json" style="display:none"/></label>
       <button id="resetBtn" class="btn-ghost">Resetuj do domyślnych</button>
     </div>
-    <div class="hint">Reset wyczyści dane lokalne (nie usuwa pliku index.html)</div>
+    <div class="hint" style="margin-top:8px">Reset przywróci pusty stan danych</div>
   </div>
 </div>
 
 <!-- club modal -->
-<div id="clubModal" class="modal" style="display:none"><div class="modal-box fade-enter" id="clubModalContent"></div></div>
+<div id="clubModal" class="modal" style="display:none"><div class="modal-box" id="clubModalContent"></div></div>
 
 <!-- lightbox -->
 <div id="lightbox" class="lightbox" style="display:none" onclick="document.getElementById('lightbox').style.display='none'"><img id="lightboxImg" src=""/></div>
 
-<footer class="footer">Wersja publikacyjna • gotowa do GitHub Pages</footer>
+<footer class="footer">Wersja finalna — gotowa do publikacji</footer>
 
 <script>
-/* ========== Config & storage ========== */
-const LOCAL_KEY = 'speedrower_live_v6';
-const ADMIN_PASS = 'Speedrower'; // nie pokazujemy w UI
+/* ---------- Storage & defaults ---------- */
+const LOCAL_KEY = 'speedrower_live_v7';
+const ADMIN_PASS = 'Speedrower'; // nie pokazujemy nigdzie
 const DEFAULT = { clubs: [], matches: [], news: [] };
 
-function load(){ const r=localStorage.getItem(LOCAL_KEY); if(!r){ localStorage.setItem(LOCAL_KEY, JSON.stringify(DEFAULT)); return JSON.parse(JSON.stringify(DEFAULT)); } try{ return JSON.parse(r); } catch(e){ localStorage.setItem(LOCAL_KEY, JSON.stringify(DEFAULT)); return JSON.parse(JSON.stringify(DEFAULT)); } }
+function load(){ const r = localStorage.getItem(LOCAL_KEY); if(!r){ localStorage.setItem(LOCAL_KEY, JSON.stringify(DEFAULT)); return JSON.parse(JSON.stringify(DEFAULT)); } try{ return JSON.parse(r); } catch(e){ localStorage.setItem(LOCAL_KEY, JSON.stringify(DEFAULT)); return JSON.parse(JSON.stringify(DEFAULT)); } }
 let DATA = load();
 function save(){ localStorage.setItem(LOCAL_KEY, JSON.stringify(DATA)); }
 
-/* ========== Navigation ========== */
+/* ---------- Navigation ---------- */
 function showSection(id){ document.querySelectorAll('.view').forEach(v=>v.style.display='none'); const e=document.getElementById(id); if(e) e.style.display='block'; if(id==='aktualnosci') renderNews(); if(id==='categories') renderCategories(); if(id==='clubs') renderClubs(); if(id==='schedule') renderSchedule(); if(id==='standings') renderStandings(); }
 document.querySelectorAll('button[data-target]').forEach(b=> b.addEventListener('click', ()=> showSection(b.dataset.target) ));
 showSection('home');
 
-/* ========== Auth & admin ========== */
+/* ---------- Banner clicks (bez haseł) ---------- */
+const bannerContent = {
+  info: { title: 'Ogłoszenia', body: 'Wszystkie ważne informacje dotyczące treningów, terminów i zasad dostępne tutaj.' },
+  organizator: { title: 'Wejście organizatora', body: 'Panel organizatora dostępny po zalogowaniu — zarządzanie klubami, meczami i aktualnościami.' },
+  trener: { title: 'Dla trenerów', body: 'Materiały szkoleniowe, kontakt i harmonogramy treningów. Skontaktuj się przez e-mail.' }
+};
+document.getElementById('subribbons').querySelectorAll('.subr').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const k = el.getAttribute('data-key');
+    const c = bannerContent[k] || { title:'Informacja', body:'' };
+    document.getElementById('bannerTitle').textContent = c.title;
+    document.getElementById('bannerBody').textContent = c.body;
+    document.getElementById('bannerModal').style.display = 'flex';
+  });
+});
+document.getElementById('closeBanner').addEventListener('click', ()=> document.getElementById('bannerModal').style.display='none');
+
+/* ---------- Auth / Admin ---------- */
 const loginModal = document.getElementById('loginModal');
 const adminPanel = document.getElementById('adminPanel');
 const loginState = document.getElementById('loginState');
@@ -268,57 +264,50 @@ document.getElementById('loginSubmit').addEventListener('click', attemptLogin);
 document.getElementById('closeAdminBtn').addEventListener('click', ()=> adminPanel.style.display='none');
 logoutBtn.addEventListener('click', logout);
 
-function attemptLogin(){ const v=document.getElementById('loginPassword').value||''; if(v===ADMIN_PASS){ sessionStorage.setItem('sr_logged_v6','1'); loginModal.style.display='none'; document.getElementById('loginPassword').value=''; loginState.textContent='Zalogowany'; logoutBtn.style.display='inline-block'; adminPanel.style.display='flex'; renderClubs(); renderNews(); renderSchedule(); renderStandings(); alert('Zalogowano.'); } else alert('Błędne hasło.'); }
-function isLogged(){ return sessionStorage.getItem('sr_logged_v6')==='1'; }
-function logout(){ sessionStorage.removeItem('sr_logged_v6'); loginState.textContent='Niezalogowany'; logoutBtn.style.display='none'; adminPanel.style.display='none'; alert('Wylogowano.'); }
+function attemptLogin(){ const v = document.getElementById('loginPassword').value || ''; if(v === ADMIN_PASS){ sessionStorage.setItem('sr_logged_v7','1'); loginModal.style.display='none'; document.getElementById('loginPassword').value=''; loginState.textContent='Zalogowany'; logoutBtn.style.display='inline-block'; adminPanel.style.display='flex'; renderClubs(); renderNews(); renderSchedule(); renderStandings(); alert('Zalogowano.'); } else alert('Błędne hasło.'); }
+function isLogged(){ return sessionStorage.getItem('sr_logged_v7') === '1'; }
+function logout(){ sessionStorage.removeItem('sr_logged_v7'); loginState.textContent='Niezalogowany'; logoutBtn.style.display='none'; adminPanel.style.display='none'; alert('Wylogowano.'); }
 if(isLogged()){ loginState.textContent='Zalogowany'; logoutBtn.style.display='inline-block'; }
 
-/* ========== News (with images) ========== */
+/* ---------- News (with images) ---------- */
 function renderNews(){
-  const c=document.getElementById('newsContainer'); c.innerHTML='';
-  if(!DATA.news || DATA.news.length===0){ c.innerHTML='<div class="muted">Brak aktualności.</div>'; return; }
-  DATA.news.slice().sort((a,b)=> new Date(b.date)-new Date(a.date)).forEach(n=>{
-    const d=new Date(n.date);
-    const div=document.createElement('div'); div.className='news-card fade-enter';
+  const c = document.getElementById('newsContainer'); c.innerHTML = '';
+  if(!DATA.news || DATA.news.length === 0){ c.innerHTML = '<div class="small">Brak aktualności.</div>'; return; }
+  DATA.news.slice().sort((a,b)=> new Date(b.date) - new Date(a.date)).forEach(n=>{
+    const d = new Date(n.date);
+    const div = document.createElement('div'); div.className = 'news-card fade-enter';
     let imgsHtml = '';
     if(n.images && n.images.length){
-      imgsHtml = '<div class="news-images">'+ n.images.map((src,idx)=> `<img src="${src}" data-idx="${idx}" />`).join('') +'</div>';
+      imgsHtml = '<div class="news-images">' + n.images.map((src,idx)=> `<img src="${src}" data-idx="${idx}" />`).join('') + '</div>';
     }
-    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${escape(n.title)}</strong><div class="small">${d.toLocaleString()}</div></div></div><div class="muted" style="margin-top:8px">${escape(n.body)}</div>${imgsHtml}`;
+    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${escape(n.title)}</strong><div class="small">${d.toLocaleString()}</div></div></div><div class="small" style="margin-top:8px">${escape(n.body)}</div>${imgsHtml}`;
     if(isLogged()){
-      const del=document.createElement('button'); del.className='btn-ghost'; del.style.marginTop='8px'; del.textContent='Usuń';
+      const del = document.createElement('button'); del.className='btn-ghost'; del.style.marginTop='8px'; del.textContent='Usuń';
       del.onclick = ()=> { if(confirm('Usunąć aktualność?')){ DATA.news = DATA.news.filter(x=>x.id!==n.id); save(); renderNews(); } };
       div.appendChild(del);
     }
     c.appendChild(div);
   });
-  // attach image click handlers (lightbox)
+  // attach lightbox handlers
   document.querySelectorAll('.news-images img').forEach(img=>{
-    img.addEventListener('click', (e)=>{
-      const src = e.target.src;
-      document.getElementById('lightboxImg').src = src;
+    img.addEventListener('click', e=>{
+      document.getElementById('lightboxImg').src = e.target.src;
       document.getElementById('lightbox').style.display = 'flex';
     });
   });
 }
-
-/* add news with images */
 document.getElementById('addNewsBtn').addEventListener('click', async ()=>{
   if(!isLogged()) return alert('Zaloguj się.');
   const title = (document.getElementById('newsTitle').value||'').trim();
   const body = (document.getElementById('newsBody').value||'').trim();
   const files = document.getElementById('newsImages').files;
   if(!title || !body) return alert('Wypełnij tytuł i treść.');
-  // read images to data URLs
   const images = [];
   if(files && files.length){
     for(let i=0;i<files.length;i++){
       const f = files[i];
-      // limit: skip too large >2.5MB to avoid localStorage issues (soft check)
-      if(f.size > 2_500_000){
-        if(!confirm(`Plik "${f.name}" ma ${Math.round(f.size/1000000)} MB — zapisać go? Duże pliki mogą spowodować wolniejsze działanie. Kontynuować?`)){
-          continue;
-        }
+      if(f.size > 4_000_000){
+        if(!confirm(`Plik "${f.name}" jest duży (${Math.round(f.size/1000000)} MB). Zapisać? Może spowolnić przeglądarkę.`)) continue;
       }
       const data = await readFileAsDataURL(f);
       images.push(data);
@@ -329,41 +318,34 @@ document.getElementById('addNewsBtn').addEventListener('click', async ()=>{
   document.getElementById('newsTitle').value=''; document.getElementById('newsBody').value=''; document.getElementById('newsImages').value='';
   renderNews(); alert('Dodano aktualność.');
 });
-function readFileAsDataURL(file){
-  return new Promise((res, rej)=>{
-    const r = new FileReader();
-    r.onload = ()=> res(r.result);
-    r.onerror = ()=> rej();
-    r.readAsDataURL(file);
-  });
-}
+function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(); r.readAsDataURL(file); }); }
 
-/* ========== Categories (nearest match) ========== */
+/* ---------- Categories (nearest match) ---------- */
 const CATS = ['U10','U13','U16','U18'];
 function renderCategories(){
-  const el = document.getElementById('categoriesList'); el.innerHTML='';
+  const el = document.getElementById('categoriesList'); el.innerHTML = '';
   CATS.forEach(cat=>{
-    const box=document.createElement('div'); box.className='card'; box.style.marginBottom='8px';
-    box.innerHTML = `<h4 style="margin:0">${cat}</h4><div class="muted" id="next-${cat}" style="margin-top:8px">Najbliższy mecz: brak</div>`;
+    const box = document.createElement('div'); box.className='card'; box.style.marginBottom='8px';
+    box.innerHTML = `<h4 style="margin:0">${cat}</h4><div class="small" id="next-${cat}" style="margin-top:8px">Najbliższy mecz: brak</div>`;
     el.appendChild(box);
   });
   const now = new Date();
   CATS.forEach(cat=>{
-    const matches = (DATA.matches||[]).filter(m=>m.category===cat).map(m=>({ ...m, dt:new Date((m.date||'')+'T'+(m.time||'00:00')) })).filter(m=>m.dt>=now).sort((a,b)=>a.dt-b.dt);
+    const matches = (DATA.matches||[]).filter(m=>m.category===cat).map(m=>({...m, dt:new Date((m.date||'')+'T'+(m.time||'00:00'))})).filter(m=>m.dt>=now).sort((a,b)=>a.dt-b.dt);
     const target = document.getElementById('next-'+cat);
     if(matches.length===0) target.textContent = 'Najbliższy mecz: brak';
-    else { const m=matches[0]; target.innerHTML = `Najbliższy mecz: <strong>${escape(m.home)} — ${escape(m.away)}</strong> • ${m.date} ${m.time||''} • ${escape(m.place||'')}`; }
+    else { const m = matches[0]; target.innerHTML = `Najbliższy mecz: <strong>${escape(m.home)} — ${escape(m.away)}</strong> • ${m.date} ${m.time||''} • ${escape(m.place||'')}`; }
   });
 }
 
-/* ========== Clubs (render/modal/admin) ========== */
+/* ---------- Clubs (render/modal/admin) ---------- */
 function renderClubs(){
-  const el = document.getElementById('clubsList'); el.innerHTML='';
-  if(!DATA.clubs || DATA.clubs.length===0){ el.innerHTML = '<div class="muted">Brak zarejestrowanych klubów.</div>'; return; }
+  const el = document.getElementById('clubsList'); el.innerHTML = '';
+  if(!DATA.clubs || DATA.clubs.length===0){ el.innerHTML = '<div class="small">Brak zarejestrowanych klubów.</div>'; return; }
   DATA.clubs.forEach(c=>{
     const d = document.createElement('div'); d.className='club-card';
     const cats = (c.categories||[]).join(', ');
-    d.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><a class="clublink" data-id="${c.id}">${escape(c.name)}</a><div class="muted">${escape(c.city||'')} ${c.short? ' • '+escape(c.short):''}</div></div><div class="small">${escape(cats)}</div></div>`;
+    d.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><a class="clublink" data-id="${c.id}">${escape(c.name)}</a><div class="small">${escape(c.city||'')} ${c.short? ' • '+escape(c.short):''}</div></div><div class="small">${escape(cats)}</div></div>`;
     el.appendChild(d);
   });
   document.querySelectorAll('.clublink').forEach(a=> a.addEventListener('click', e=> { e.preventDefault(); openClubModal(a.getAttribute('data-id')); }));
@@ -371,11 +353,11 @@ function renderClubs(){
 function openClubModal(id){
   const club = DATA.clubs.find(x=>x.id===id); if(!club) return alert('Nie znaleziono klubu.');
   const content = document.getElementById('clubModalContent'); content.innerHTML='';
-  const title = document.createElement('div'); title.innerHTML = `<h3 style="margin:0;color:var(--accent1)">${escape(club.name)}</h3><div class="muted">${escape(club.city||'')} ${club.short? ' • '+escape(club.short):''}</div><div class="small" style="margin-top:8px">Kategorie: ${(club.categories||[]).join(', ')}</div>`;
+  const title = document.createElement('div'); title.innerHTML = `<h3 style="margin:0;color:var(--accent1)">${escape(club.name)}</h3><div class="small">${escape(club.city||'')} ${club.short? ' • '+escape(club.short):''}</div><div class="small" style="margin-top:8px">Kategorie: ${(club.categories||[]).join(', ')}</div>`;
   content.appendChild(title);
   content.appendChild(createInfo('Opis', club.description||'Brak opisu.'));
-  content.appendChild(createInfo('Osiągnięcia', (club.achievements&&club.achievements.length)? ('<ul class="muted">'+club.achievements.map(a=>'<li>'+escape(a)+'</li>').join('')+'</ul>'):'Brak'));
-  content.appendChild(createInfo('Skład', (club.roster&&club.roster.length)? ('<ul class="muted">'+club.roster.map(p=>'<li>'+escape(p)+'</li>').join('')+'</ul>'):'Brak'));
+  content.appendChild(createInfo('Osiągnięcia', (club.achievements&&club.achievements.length)? ('<ul class="small">'+club.achievements.map(a=>'<li>'+escape(a)+'</li>').join('')+'</ul>'):'Brak'));
+  content.appendChild(createInfo('Skład', (club.roster&&club.roster.length)? ('<ul class="small">'+club.roster.map(p=>'<li>'+escape(p)+'</li>').join('')+'</ul>'):'Brak'));
   if(isLogged()){
     const actions = document.createElement('div'); actions.style.marginTop='12px'; actions.style.textAlign='right';
     const edit = document.createElement('button'); edit.className='btn'; edit.textContent='Edytuj'; edit.onclick = ()=> { document.getElementById('clubModal').style.display='none'; loadClubToForm(club.id); };
@@ -384,8 +366,8 @@ function openClubModal(id){
   }
   document.getElementById('clubModal').style.display='flex';
 }
-function createInfo(title, html){ const d=document.createElement('div'); d.style.marginTop='12px'; d.innerHTML = `<strong>${title}</strong><div class="muted" style="margin-top:8px">${html}</div>`; return d; }
-document.getElementById('closeClubModal').addEventListener('click', ()=> document.getElementById('clubModal').style.display='none');
+function createInfo(title, html){ const d = document.createElement('div'); d.style.marginTop='12px'; d.innerHTML = `<strong>${title}</strong><div class="small" style="margin-top:8px">${html}</div>`; return d; }
+document.getElementById('clubModal').addEventListener('click', (e)=> { if(e.target.id === 'clubModal') document.getElementById('clubModal').style.display='none'; });
 
 document.getElementById('saveClubBtn').addEventListener('click', ()=> {
   if(!isLogged()) return alert('Zaloguj się.');
@@ -401,7 +383,7 @@ document.getElementById('clearClubBtn').addEventListener('click', clearClubForm)
 function clearClubForm(){ ['clubName','clubCity','clubShort','clubDesc','clubAchievements','clubRoster'].forEach(id=>document.getElementById(id).value=''); Array.from(document.getElementById('clubCategories').options).forEach(o=>o.selected=false); delete document.getElementById('clubName').dataset.editing; }
 function loadClubToForm(id){ const club = DATA.clubs.find(c=>c.id===id); if(!club) return alert('Nie znaleziono klubu.'); document.getElementById('clubName').value=club.name||''; document.getElementById('clubCity').value=club.city||''; document.getElementById('clubShort').value=club.short||''; document.getElementById('clubDesc').value=club.description||''; document.getElementById('clubAchievements').value=(club.achievements||[]).join(', '); document.getElementById('clubRoster').value=(club.roster||[]).join(', '); Array.from(document.getElementById('clubCategories').options).forEach(o=> o.selected = (club.categories||[]).includes(o.value)); document.getElementById('clubName').dataset.editing = club.id; adminPanel.style.display='flex'; }
 
-/* ========== Matches ========== */
+/* ---------- Matches ---------- */
 document.getElementById('saveMatchBtn').addEventListener('click', ()=> {
   if(!isLogged()) return alert('Zaloguj się.');
   const date=(document.getElementById('matchDate').value||'').trim(); const time=(document.getElementById('matchTime').value||'').trim();
@@ -414,13 +396,13 @@ document.getElementById('saveMatchBtn').addEventListener('click', ()=> {
 });
 document.getElementById('clearMatchBtn').addEventListener('click', clearMatchForm);
 function clearMatchForm(){ ['matchDate','matchTime','matchHome','matchAway','matchPlace','matchHomeGoals','matchAwayGoals'].forEach(id=>document.getElementById(id).value=''); document.getElementById('matchCategory').selectedIndex=0; }
-function renderSchedule(){ const el=document.getElementById('scheduleList'); el.innerHTML=''; if(!DATA.matches || DATA.matches.length===0){ el.innerHTML='<div class="muted">Brak zaplanowanych meczów.</div>'; return; } const sorted = DATA.matches.slice().sort((a,b)=> (a.date+(a.time||'')).localeCompare(b.date+(b.time||''))); const tbl=document.createElement('table'); tbl.className='table'; tbl.innerHTML='<thead><tr><th>Data</th><th>Godz.</th><th>Mecz</th><th>Kategoria</th><th>Miejsce</th><th>Wynik</th><th>Akcje</th></tr></thead>'; const tbody=document.createElement('tbody'); sorted.forEach(m=>{ const res = (typeof m.homeGoals==='number' && typeof m.awayGoals==='number')?`${m.homeGoals} : ${m.awayGoals}` : '-'; const tr=document.createElement('tr'); tr.innerHTML=`<td>${escape(m.date)}</td><td>${escape(m.time||'')}</td><td>${escape(m.home)} — ${escape(m.away)}</td><td>${escape(m.category||'')}</td><td>${escape(m.place||'')}</td><td>${res}</td><td></td>`; const td = tr.querySelector('td:last-child'); if(isLogged()){ const edit=document.createElement('button'); edit.className='btn-ghost'; edit.textContent='Edytuj'; edit.onclick=()=> loadMatchToForm(m.id); const del=document.createElement('button'); del.className='btn-ghost'; del.textContent='Usuń'; del.onclick=()=>{ if(confirm('Usunąć mecz?')){ DATA.matches=DATA.matches.filter(x=>x.id!==m.id); save(); renderSchedule(); renderCategories(); renderStandings(); } }; td.appendChild(edit); td.appendChild(del); } tbody.appendChild(tr); }); tbl.appendChild(tbody); el.appendChild(tbl); }
+function renderSchedule(){ const el = document.getElementById('scheduleList'); el.innerHTML=''; if(!DATA.matches || DATA.matches.length===0){ el.innerHTML = '<div class="small">Brak zaplanowanych meczów.</div>'; return; } const sorted = DATA.matches.slice().sort((a,b)=> (a.date+(a.time||'')).localeCompare(b.date+(b.time||''))); const tbl = document.createElement('table'); tbl.className='table'; tbl.innerHTML = '<thead><tr><th>Data</th><th>Godz.</th><th>Mecz</th><th>Kategoria</th><th>Miejsce</th><th>Wynik</th><th>Akcje</th></tr></thead>'; const tbody = document.createElement('tbody'); sorted.forEach(m=>{ const res = (typeof m.homeGoals==='number' && typeof m.awayGoals==='number')?`${m.homeGoals} : ${m.awayGoals}` : '-'; const tr = document.createElement('tr'); tr.innerHTML = `<td>${escape(m.date)}</td><td>${escape(m.time||'')}</td><td>${escape(m.home)} — ${escape(m.away)}</td><td>${escape(m.category||'')}</td><td>${escape(m.place||'')}</td><td>${res}</td><td></td>`; const td = tr.querySelector('td:last-child'); if(isLogged()){ const edit = document.createElement('button'); edit.className='btn-ghost'; edit.textContent='Edytuj'; edit.onclick = ()=> loadMatchToForm(m.id); const del = document.createElement('button'); del.className='btn-ghost'; del.textContent='Usuń'; del.onclick = ()=> { if(confirm('Usunąć mecz?')){ DATA.matches = DATA.matches.filter(x=>x.id!==m.id); save(); renderSchedule(); renderCategories(); renderStandings(); } }; td.appendChild(edit); td.appendChild(del); } tbody.appendChild(tr); }); tbl.appendChild(tbody); el.appendChild(tbl); }
 function loadMatchToForm(id){ const m = DATA.matches.find(x=>x.id===id); if(!m) return alert('Nie znaleziono meczu.'); document.getElementById('matchDate').value=m.date||''; document.getElementById('matchTime').value=m.time||''; document.getElementById('matchHome').value=m.home||''; document.getElementById('matchAway').value=m.away||''; document.getElementById('matchPlace').value=m.place||''; document.getElementById('matchCategory').value=m.category||'U10'; document.getElementById('matchHomeGoals').value=(typeof m.homeGoals==='number')?m.homeGoals:''; document.getElementById('matchAwayGoals').value=(typeof m.awayGoals==='number')?m.awayGoals:''; DATA.matches = DATA.matches.filter(x=>x.id!==id); save(); renderSchedule(); }
 
-/* ========== Standings ========== */
-function renderStandings(){ const el=document.getElementById('standingsTable'); el.innerHTML=''; if(!DATA.matches || DATA.matches.length===0 || !DATA.clubs || DATA.clubs.length===0){ el.innerHTML='<div class="muted">Brak danych do wyliczeń (potrzebne kluby i mecze z wynikami).</div>'; return; } const map={}; DATA.clubs.forEach(c=> map[c.name] = { club:c.name, MP:0,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0 }); DATA.matches.forEach(m=>{ if(typeof m.homeGoals!=='number' || typeof m.awayGoals!=='number') return; if(!map[m.home] || !map[m.away]) return; map[m.home].MP++; map[m.away].MP++; map[m.home].GF += m.homeGoals; map[m.home].GA += m.awayGoals; map[m.away].GF += m.awayGoals; map[m.away].GA += m.homeGoals; if(m.homeGoals>m.awayGoals){ map[m.home].W++; map[m.home].P+=3; map[m.away].L++; } else if(m.homeGoals<m.awayGoals){ map[m.away].W++; map[m.away].P+=3; map[m.home].L++; } else { map[m.home].D++; map[m.away].D++; map[m.home].P++; map[m.away].P++; } }); Object.values(map).forEach(r=> r.GD = r.GF - r.GA); const sorted = Object.values(map).sort((a,b)=> (b.P - a.P) || (b.GD - a.GD) || (b.GF - a.GF)); if(sorted.length===0){ el.innerHTML='<div class="muted">Brak danych.</div>'; return; } const tbl=document.createElement('table'); tbl.className='table'; tbl.innerHTML='<thead><tr><th>#</th><th>Klub</th><th>MP</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th></tr></thead>'; const tbody=document.createElement('tbody'); sorted.forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${escape(r.club)}</td><td>${r.MP}</td><td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td><td>${r.GF}</td><td>${r.GA}</td><td>${r.GD}</td>`; tbody.appendChild(tr); }); tbl.appendChild(tbody); el.appendChild(tbl); }
+/* ---------- Standings ---------- */
+function renderStandings(){ const el = document.getElementById('standingsTable'); el.innerHTML=''; if(!DATA.matches || DATA.matches.length===0 || !DATA.clubs || DATA.clubs.length===0){ el.innerHTML = '<div class="small">Brak danych do wyliczeń (potrzebne kluby i mecze z wynikami).</div>'; return; } const map = {}; DATA.clubs.forEach(c=> map[c.name] = { club:c.name, MP:0,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0 }); DATA.matches.forEach(m=>{ if(typeof m.homeGoals!=='number' || typeof m.awayGoals!=='number') return; if(!map[m.home] || !map[m.away]) return; map[m.home].MP++; map[m.away].MP++; map[m.home].GF += m.homeGoals; map[m.home].GA += m.awayGoals; map[m.away].GF += m.awayGoals; map[m.away].GA += m.homeGoals; if(m.homeGoals>m.awayGoals){ map[m.home].W++; map[m.home].P+=3; map[m.away].L++; } else if(m.homeGoals<m.awayGoals){ map[m.away].W++; map[m.away].P+=3; map[m.home].L++; } else { map[m.home].D++; map[m.away].D++; map[m.home].P++; map[m.away].P++; } }); Object.values(map).forEach(r=> r.GD = r.GF - r.GA); const sorted = Object.values(map).sort((a,b)=> (b.P - a.P) || (b.GD - a.GD) || (b.GF - a.GF)); if(sorted.length===0){ el.innerHTML = '<div class="small">Brak danych.</div>'; return; } const tbl = document.createElement('table'); tbl.className='table'; tbl.innerHTML='<thead><tr><th>#</th><th>Klub</th><th>MP</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th></tr></thead>'; const tbody = document.createElement('tbody'); sorted.forEach((r,i)=>{ const tr = document.createElement('tr'); tr.innerHTML = `<td>${i+1}</td><td>${escape(r.club)}</td><td>${r.MP}</td><td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td><td>${r.GF}</td><td>${r.GA}</td><td>${r.GD}</td>`; tbody.appendChild(tr); }); tbl.appendChild(tbody); el.appendChild(tbl); }
 
-/* ========== Export/Import/Reset ========== */
+/* ---------- Export/Import/Reset ---------- */
 document.getElementById('exportBtn').addEventListener('click', ()=> { if(!isLogged()) return alert('Zaloguj się.'); exportData(); });
 document.getElementById('exportBtn2').addEventListener('click', ()=> { if(!isLogged()) return alert('Zaloguj się.'); exportData(); });
 document.getElementById('importFile').addEventListener('change', (e)=> { if(!isLogged()) return alert('Zaloguj się.'); importData(e); });
@@ -429,18 +411,16 @@ document.getElementById('resetBtn').addEventListener('click', ()=> { if(!isLogge
 function exportData(){ const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='speedrower-data.json'; a.click(); URL.revokeObjectURL(url); }
 function importData(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=function(){ try{ const obj=JSON.parse(reader.result); if(obj && typeof obj==='object'){ DATA = obj; save(); renderClubs(); renderNews(); renderSchedule(); renderStandings(); alert('Import zakończony.'); } else alert('Niepoprawny JSON.'); }catch(err){ alert('Błąd: '+err.message); } }; reader.readAsText(file); }
 
-/* ========== Utils & init ========== */
+/* ---------- Utils & init ---------- */
 function uid(p='id'){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function escape(s){ if(s===undefined||s===null) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
-function renderNews(){ /* placeholder overwritten earlier */ }
-renderNews = (function(){ /* re-bind to existing function above */ return window.renderNews || function(){}; })();
 
 /* initial render */
 renderNews(); renderCategories(); renderClubs(); renderSchedule(); renderStandings();
 
-/* lightbox: close on click handled in markup */
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ loginModal.style.display='none'; document.getElementById('clubModal').style.display='none'; adminPanel.style.display='none'; document.getElementById('lightbox').style.display='none'; } });
-
+/* lightbox close */
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ document.getElementById('loginModal').style.display='none'; document.getElementById('clubModal').style.display='none'; document.getElementById('adminPanel').style.display='none'; document.getElementById('lightbox').style.display='none'; } });
 </script>
+
 </body>
 </html>
