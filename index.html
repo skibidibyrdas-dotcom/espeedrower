@@ -23,15 +23,21 @@
     min-height:100vh;
   }
   .wrap{max-width:var(--maxw);margin:20px auto;padding:18px}
+  /* --- POPRAWIONY BANER --- */
   .hero{
     display:flex;align-items:center;justify-content:space-between;gap:12px;
     background:linear-gradient(90deg,var(--g1),var(--g2));
-    border-radius:18px;padding:18px;color:var(--accentText);box-shadow:0 18px 50px rgba(0,0,0,0.45);
+    border-radius:18px;padding:18px;color:#ffffff; /* <-- tekst biały dla kontrastu */
+    box-shadow:0 18px 50px rgba(0,0,0,0.45);
+    position:relative;
+    overflow:hidden;
   }
-  .hero h1{margin:0;font-size:20px}
-  .hero .tag{background:rgba(0,0,0,0.06);padding:6px 10px;border-radius:999px;font-weight:800}
+  .hero h1{margin:0;font-size:22px;line-height:1.05;color:#ffffff;font-weight:900;text-shadow:0 4px 18px rgba(0,0,0,0.45)}
+  .hero .small{color:rgba(255,255,255,0.92);margin-top:6px}
+  .hero .tag{background:rgba(0,0,0,0.06);padding:6px 10px;border-radius:999px;font-weight:800;color:#071011}
+  /* ------------------------- */
   nav{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
-  .btn{background:rgba(255,255,255,0.95);color:var(--accentText);padding:8px 12px;border-radius:12px;border:none;cursor:pointer;font-weight:800}
+  .btn{background:rgba(255,255,255,0.95);color:#071011;padding:8px 12px;border-radius:12px;border:none;cursor:pointer;font-weight:800}
   .btn-ghost{background:transparent;color:inherit;padding:8px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
   .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
   @media(max-width:980px){.grid{grid-template-columns:1fr}}
@@ -50,11 +56,8 @@
   .fancyTitle{background:linear-gradient(90deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
   .footer{color:var(--muted);text-align:center;margin:18px 0}
   .hidden{display:none}
-  /* subtle hover */
   .card:hover{transform:translateY(-6px);transition:transform .18s}
-  /* success toast */
-  #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:30px;background:linear-gradient(90deg,var(--g1),var(--g2));color:var(--accentText);padding:12px 18px;border-radius:999px;box-shadow:0 12px 40px rgba(0,0,0,0.5);display:none;z-index:20000}
-  /* confetti canvas */
+  #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:30px;background:linear-gradient(90deg,var(--g1),var(--g2));color:#071011;padding:12px 18px;border-radius:999px;box-shadow:0 12px 40px rgba(0,0,0,0.5);display:none;z-index:20000}
   #confetti{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:20000}
 </style>
 </head>
@@ -62,11 +65,11 @@
 <div class="wrap">
   <div class="hero">
     <div>
-      <h1 class="fancyTitle">Speedrower League Junior</h1>
+      <h1>Speedrower League Junior</h1>
       <div class="small">Liga juniorów do 18 lat — terminarz, kluby, aktualności</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
-      <div class="badge">Zielony • Fiolet</div>
+      <div class="tag">Zieleń • Fiolet</div>
       <button id="openPanelBtn" class="btn-ghost">Panel organizatora</button>
       <a class="btn" href="https://skibidibyrdas-dotcom.github.io/espeedrower/" target="_blank">Odwiedź stronę</a>
     </div>
@@ -218,15 +221,12 @@
 
 <!-- Firebase modules -->
 <script type="module">
-  // -------------------- ADMIN PASS (zmień jeśli chcesz) --------------------
   const ADMIN_PASS = 'Speedrower';
-  // ------------------------------------------------------------------------
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-  import { getStorage, ref as sref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
+  import { getStorage, ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 
-  // --------- TWOJA KONFIGURACJA (wkleiłeś wcześniej) ----------
   const firebaseConfig = {
     apiKey: "AIzaSyDNi83_zoH8cDSpYoTS4XtoGLPDKnypG1A",
     authDomain: "speedrower-junior-league.firebaseapp.com",
@@ -236,13 +236,11 @@
     appId: "1:151487950214:web:54742c6cae06f267661007",
     measurementId: "G-BTW6P3QMS3"
   };
-  // ------------------------------------------------------------
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const storage = getStorage(app);
 
-  // UI refs
   const showBtns = document.querySelectorAll('[data-show]');
   const views = document.querySelectorAll('.view');
   const openPanelBtn = document.getElementById('openPanelBtn');
@@ -256,7 +254,6 @@
   const confettiCanv = document.getElementById('confetti');
   const tickerInner = document.getElementById('tickerInner');
 
-  // nav
   showBtns.forEach(b=> b.addEventListener('click', ()=> {
     const id = b.dataset.show;
     views.forEach(v=> v.classList.add('hidden'));
@@ -266,75 +263,20 @@
   views.forEach(v=> v.classList.add('hidden'));
   document.getElementById('home').classList.remove('hidden');
 
-  // panel open/close
   openPanelBtn.addEventListener('click', ()=> {
     panelModal.classList.remove('hidden');
-    if(sessionStorage.getItem('sr_admin')==='1') {
-      showAdmin(true);
-    }
+    if(sessionStorage.getItem('sr_admin')==='1') { adminControls.classList.remove('hidden'); loginWrap.classList.add('hidden'); }
   });
   closePanel.addEventListener('click', ()=> panelModal.classList.add('hidden'));
 
-  function showAdmin(on){
-    if(on){
-      adminControls.classList.remove('hidden');
-      loginWrap.classList.add('hidden');
-      sessionStorage.setItem('sr_admin','1');
-      document.getElementById('adminPass').value = '';
-    } else {
-      adminControls.classList.add('hidden');
-      loginWrap.classList.remove('hidden');
-      sessionStorage.removeItem('sr_admin');
-    }
-  }
-
-  // login check
-  loginBtn.addEventListener('click', ()=> {
-    const v = (adminPassInput.value||'').trim();
-    if(!v) return alert('Wpisz hasło.');
-    if(v === ADMIN_PASS){
-      showAdmin(true);
-      showToast('Panel odblokowany');
-    } else alert('Błędne hasło.');
-  });
-  if(sessionStorage.getItem('sr_admin')==='1') showAdmin(true);
-
-  // helpers
-  function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
-  function uid(p='id'){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-  function showToast(msg, t=2200){
-    toast.textContent = msg; toast.style.display='block'; setTimeout(()=> toast.style.display='none', t);
-  }
-
-  // confetti simple
+  function showToast(msg, t=2200){ toast.textContent = msg; toast.style.display='block'; setTimeout(()=> toast.style.display='none', t); }
   function popConfetti(){
-    const c = confettiCanv; const ctx = c.getContext('2d');
-    c.width = innerWidth; c.height = innerHeight;
-    const pieces = Array.from({length:60}).map(()=>({
-      x: Math.random()*c.width,
-      y: -20 - Math.random()*200,
-      vx: (Math.random()-0.5)*6,
-      vy: 2+Math.random()*6,
-      w: 6+Math.random()*10,
-      h: 6+Math.random()*10,
-      col: Math.random()>0.5 ? '#7ff08a' : '#b070ff',
-      rot: Math.random()*360
-    }));
-    let t=0;
-    const raf = ()=> {
-      t++; ctx.clearRect(0,0,c.width,c.height);
-      pieces.forEach(p=>{
-        p.x += p.vx; p.y += p.vy; p.vy += 0.12;
-        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot * Math.PI/180);
-        ctx.fillStyle = p.col; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-        ctx.restore();
-      });
-      if(t<160) requestAnimationFrame(raf); else ctx.clearRect(0,0,c.width,c.height);
-    };
-    raf();
+    const c = confettiCanv; const ctx = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
+    const pieces = Array.from({length:60}).map(()=>({x: Math.random()*c.width,y: -20 - Math.random()*200,vx: (Math.random()-0.5)*6,vy: 2+Math.random()*6,w: 6+Math.random()*10,h: 6+Math.random()*10,col: Math.random()>0.5 ? '#7ff08a' : '#b070ff',rot: Math.random()*360}));
+    let t=0; const raf = ()=> { t++; ctx.clearRect(0,0,c.width,c.height); pieces.forEach(p=>{ p.x += p.vx; p.y += p.vy; p.vy += 0.12; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot * Math.PI/180); ctx.fillStyle = p.col; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); }); if(t<160) requestAnimationFrame(raf); else ctx.clearRect(0,0,c.width,c.height); }; raf();
   }
 
-  // ---------- Firestore: load news ----------
+  // News
   const newsList = document.getElementById('newsList');
   async function loadNews(){
     newsList.innerHTML = 'Ładowanie...';
@@ -355,7 +297,6 @@
     } catch(e){ newsList.innerHTML = '<div class="small">Błąd wczytywania aktualności.</div>'; console.error(e); }
   }
 
-  // upload files to storage
   async function uploadFiles(files){
     if(!files || files.length===0) return [];
     const urls = [];
@@ -369,7 +310,6 @@
     return urls;
   }
 
-  // add news
   document.getElementById('addNews').addEventListener('click', async ()=>{
     if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem w panelu.');
     const title = document.getElementById('newsTitle').value.trim();
@@ -381,17 +321,13 @@
       const imgs = await uploadFiles(files);
       await addDoc(collection(db,'aktualnosci'), { title, content, images: imgs, author: 'Organizer (hasło)', createdAt: serverTimestamp() });
       document.getElementById('newsTitle').value=''; document.getElementById('newsContent').value=''; document.getElementById('newsFiles').value='';
-      showToast('Aktualność dodana');
-      popConfetti();
-      loadNews(); updateTicker(); updateStats();
+      showToast('Aktualność dodana'); popConfetti(); loadNews(); updateTicker(); updateStats();
     } catch(e){ alert('Błąd: '+e.message); console.error(e); } finally { btn.disabled=false; btn.textContent='Dodaj aktualność'; }
   });
 
-  document.getElementById('clearNews').addEventListener('click', ()=> {
-    document.getElementById('newsTitle').value=''; document.getElementById('newsContent').value=''; document.getElementById('newsFiles').value='';
-  });
+  document.getElementById('clearNews').addEventListener('click', ()=> { document.getElementById('newsTitle').value=''; document.getElementById('newsContent').value=''; document.getElementById('newsFiles').value=''; });
 
-  // ---------- Clubs ----------
+  // Clubs
   const clubsList = document.getElementById('clubsList');
   async function loadClubs(){
     clubsList.innerHTML = '';
@@ -402,10 +338,7 @@
         const c = s.data();
         const div = document.createElement('div'); div.className='card';
         div.innerHTML = `<strong>${escapeHtml(c.name)}</strong><div class="small">${escapeHtml(c.city||'')} ${c.short?('• '+escapeHtml(c.short)):""}</div><div style="margin-top:8px">${escapeHtml(c.description||'')}</div>`;
-        if(sessionStorage.getItem('sr_admin')==='1'){
-          const ctrl = document.createElement('div'); ctrl.style.marginTop='8px'; ctrl.innerHTML = `<button class="btn-ghost" onclick="window.editClub('${s.id}')">Edytuj</button> <button class="btn-ghost" onclick="window.deleteClub('${s.id}')">Usuń</button>`;
-          div.appendChild(ctrl);
-        }
+        if(sessionStorage.getItem('sr_admin')==='1'){ const ctrl = document.createElement('div'); ctrl.style.marginTop='8px'; ctrl.innerHTML = `<button class="btn-ghost" onclick="window.editClub('${s.id}')">Edytuj</button> <button class="btn-ghost" onclick="window.deleteClub('${s.id}')">Usuń</button>`; div.appendChild(ctrl); }
         clubsList.appendChild(div);
       });
     } catch(e){ clubsList.innerHTML = '<div class="small">Błąd ładowania klubów.</div>'; console.error(e); }
@@ -414,167 +347,37 @@
   document.getElementById('saveClub').addEventListener('click', async ()=>{
     if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.');
     const name = document.getElementById('clubName').value.trim(); if(!name) return alert('Nazwa klubu wymagana.');
-    const data = {
-      name,
-      city: document.getElementById('clubCity').value.trim(),
-      short: document.getElementById('clubShort').value.trim(),
-      description: document.getElementById('clubDesc').value.trim(),
-      achievements: (document.getElementById('clubAchievements').value||'').split(',').map(s=>s.trim()).filter(Boolean),
-      roster: (document.getElementById('clubRoster').value||'').split(',').map(s=>s.trim()).filter(Boolean),
-      categories: Array.from(document.getElementById('clubCats').selectedOptions).map(o=>o.value),
-      createdAt: serverTimestamp(), author: 'Organizer (hasło)'
-    };
-    try {
-      await addDoc(collection(db,'kluby'), data);
-      showToast('Dodano klub');
-      loadClubs(); updateStats();
-    } catch(e){ alert('Błąd: '+e.message); }
+    const data = { name, city: document.getElementById('clubCity').value.trim(), short: document.getElementById('clubShort').value.trim(), description: document.getElementById('clubDesc').value.trim(), achievements: (document.getElementById('clubAchievements').value||'').split(',').map(s=>s.trim()).filter(Boolean), roster: (document.getElementById('clubRoster').value||'').split(',').map(s=>s.trim()).filter(Boolean), categories: Array.from(document.getElementById('clubCats').selectedOptions).map(o=>o.value), createdAt: serverTimestamp(), author: 'Organizer (hasło)' };
+    try { await addDoc(collection(db,'kluby'), data); showToast('Dodano klub'); loadClubs(); updateStats(); } catch(e){ alert('Błąd: '+e.message); }
   });
 
-  window.deleteClub = async function(id){
-    if(!confirm('Usunąć klub?')) return;
-    try { await deleteDoc(doc(db,'kluby',id)); loadClubs(); updateStats(); } catch(e){ alert('Błąd: '+e.message); }
-  };
+  window.deleteClub = async function(id){ if(!confirm('Usunąć klub?')) return; try { await deleteDoc(doc(db,'kluby',id)); loadClubs(); updateStats(); } catch(e){ alert('Błąd: '+e.message); } };
+  document.getElementById('clearClub').addEventListener('click', ()=> { document.getElementById('clubName').value=''; document.getElementById('clubCity').value=''; document.getElementById('clubShort').value=''; document.getElementById('clubDesc').value=''; document.getElementById('clubAchievements').value=''; document.getElementById('clubRoster').value=''; Array.from(document.getElementById('clubCats').options).forEach(o=>o.selected=false); });
 
-  document.getElementById('clearClub').addEventListener('click', ()=> {
-    document.getElementById('clubName').value=''; document.getElementById('clubCity').value=''; document.getElementById('clubShort').value='';
-    document.getElementById('clubDesc').value=''; document.getElementById('clubAchievements').value=''; document.getElementById('clubRoster').value='';
-    Array.from(document.getElementById('clubCats').options).forEach(o=>o.selected=false);
-  });
-
-  // ---------- Matches ----------
+  // Matches
   const scheduleList = document.getElementById('scheduleList');
-  async function loadMatches(){
-    scheduleList.innerHTML = '';
-    try {
-      const snap = await getDocs(query(collection(db,'mecze'), orderBy('date','asc')));
-      if(snap.empty){ scheduleList.innerHTML = '<div class="small">Brak meczów.</div>'; return; }
-      const table = document.createElement('table'); table.className='table';
-      table.innerHTML = '<thead><tr><th>Data</th><th>Godz.</th><th>Mecz</th><th>Kategoria</th><th>Miejsce</th><th>Wynik</th><th>Akcje</th></tr></thead>';
-      const tb = document.createElement('tbody');
-      snap.forEach(s=>{
-        const m = s.data();
-        const tr = document.createElement('tr');
-        const res = (typeof m.homeGoals==='number' && typeof m.awayGoals==='number') ? `${m.homeGoals} : ${m.awayGoals}` : '-';
-        tr.innerHTML = `<td>${escapeHtml(m.date||'')}</td><td>${escapeHtml(m.time||'')}</td><td>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</td><td>${escapeHtml(m.category||'')}</td><td>${escapeHtml(m.place||'')}</td><td>${res}</td><td></td>`;
-        const td = tr.querySelector('td:last-child');
-        if(sessionStorage.getItem('sr_admin')==='1'){
-          const del = document.createElement('button'); del.className='btn-ghost'; del.textContent='Usuń'; del.onclick = async ()=> { if(confirm('Usunąć mecz?')){ await deleteDoc(doc(db,'mecze',s.id)); loadMatches(); renderStandings(); updateTicker(); } };
-          td.appendChild(del);
-        }
-        tb.appendChild(tr);
-      });
-      table.appendChild(tb); scheduleList.appendChild(table);
-    } catch(e){ scheduleList.innerHTML = '<div class="small">Błąd ładowania terminarza.</div>'; console.error(e); }
-  }
+  async function loadMatches(){ scheduleList.innerHTML = ''; try { const snap = await getDocs(query(collection(db,'mecze'), orderBy('date','asc'))); if(snap.empty){ scheduleList.innerHTML = '<div class="small">Brak meczów.</div>'; return; } const table = document.createElement('table'); table.className='table'; table.innerHTML = '<thead><tr><th>Data</th><th>Godz.</th><th>Mecz</th><th>Kategoria</th><th>Miejsce</th><th>Wynik</th><th>Akcje</th></tr></thead>'; const tb = document.createElement('tbody'); snap.forEach(s=>{ const m = s.data(); const tr = document.createElement('tr'); const res = (typeof m.homeGoals==='number' && typeof m.awayGoals==='number') ? `${m.homeGoals} : ${m.awayGoals}` : '-'; tr.innerHTML = `<td>${escapeHtml(m.date||'')}</td><td>${escapeHtml(m.time||'')}</td><td>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</td><td>${escapeHtml(m.category||'')}</td><td>${escapeHtml(m.place||'')}</td><td>${res}</td><td></td>`; const td = tr.querySelector('td:last-child'); if(sessionStorage.getItem('sr_admin')==='1'){ const del = document.createElement('button'); del.className='btn-ghost'; del.textContent='Usuń'; del.onclick = async ()=> { if(confirm('Usunąć mecz?')){ await deleteDoc(doc(db,'mecze',s.id)); loadMatches(); renderStandings(); updateTicker(); } }; td.appendChild(del); } tb.appendChild(tr); }); table.appendChild(tb); scheduleList.appendChild(table); } catch(e){ scheduleList.innerHTML = '<div class="small">Błąd ładowania terminarza.</div>'; console.error(e); } }
 
-  document.getElementById('saveMatch').addEventListener('click', async ()=>{
-    if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.');
-    const date = document.getElementById('matchDate').value;
-    const time = document.getElementById('matchTime').value;
-    const home = document.getElementById('matchHome').value.trim();
-    const away = document.getElementById('matchAway').value.trim();
-    const place = document.getElementById('matchPlace').value.trim();
-    const cat = document.getElementById('matchCat').value;
-    const hg = document.getElementById('matchHomeGoals').value;
-    const ag = document.getElementById('matchAwayGoals').value;
-    if(!date || !home || !away) return alert('Wypełnij datę, gospodarza i gościa.');
-    const data = { date, time, home, away, place, category:cat, homeGoals: hg===''?null: Number(hg), awayGoals: ag===''?null: Number(ag), createdAt: serverTimestamp(), author: 'Organizer (hasło)' };
-    try { await addDoc(collection(db,'mecze'), data); showToast('Mecz dodany'); loadMatches(); renderStandings(); updateTicker(); } catch(e){ alert('Błąd: '+e.message); }
-  });
+  document.getElementById('saveMatch').addEventListener('click', async ()=>{ if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.'); const date = document.getElementById('matchDate').value; const time = document.getElementById('matchTime').value; const home = document.getElementById('matchHome').value.trim(); const away = document.getElementById('matchAway').value.trim(); const place = document.getElementById('matchPlace').value.trim(); const cat = document.getElementById('matchCat').value; const hg = document.getElementById('matchHomeGoals').value; const ag = document.getElementById('matchAwayGoals').value; if(!date || !home || !away) return alert('Wypełnij datę, gospodarza i gościa.'); const data = { date, time, home, away, place, category:cat, homeGoals: hg===''?null: Number(hg), awayGoals: ag===''?null: Number(ag), createdAt: serverTimestamp(), author: 'Organizer (hasło)' }; try { await addDoc(collection(db,'mecze'), data); showToast('Mecz dodany'); loadMatches(); renderStandings(); updateTicker(); } catch(e){ alert('Błąd: '+e.message); } });
 
-  // ---------- Standings ----------
-  async function renderStandings(){
-    const el = document.getElementById('standingsList'); el.innerHTML = '';
-    try {
-      const clubsSnap = await getDocs(collection(db,'kluby'));
-      const matchesSnap = await getDocs(collection(db,'mecze'));
-      if(clubsSnap.empty || matchesSnap.empty){ el.innerHTML = '<div class="small">Brak danych do wyliczeń.</div>'; return; }
-      const map = {};
-      clubsSnap.forEach(c => { const d = c.data(); map[d.name] = { club: d.name, MP:0,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0 }; });
-      matchesSnap.forEach(mSnap => {
-        const m = mSnap.data();
-        if(typeof m.homeGoals!=='number' || typeof m.awayGoals!=='number') return;
-        if(!map[m.home] || !map[m.away]) return;
-        map[m.home].MP++; map[m.away].MP++;
-        map[m.home].GF += m.homeGoals; map[m.home].GA += m.awayGoals;
-        map[m.away].GF += m.awayGoals; map[m.away].GA += m.homeGoals;
-        if(m.homeGoals>m.awayGoals){ map[m.home].W++; map[m.home].P+=3; map[m.away].L++; }
-        else if(m.homeGoals<m.awayGoals){ map[m.away].W++; map[m.away].P+=3; map[m.home].L++; }
-        else { map[m.home].D++; map[m.away].D++; map[m.home].P++; map[m.away].P++; }
-      });
-      Object.values(map).forEach(r=> r.GD = r.GF - r.GA);
-      const sorted = Object.values(map).sort((a,b)=> (b.P - a.P) || (b.GD - a.GD) || (b.GF - a.GF));
-      const tbl = document.createElement('table'); tbl.className='table';
-      tbl.innerHTML = '<thead><tr><th>#</th><th>Klub</th><th>MP</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th></tr></thead>';
-      const tbody = document.createElement('tbody');
-      sorted.forEach((r,i)=> { const tr = document.createElement('tr'); tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.club)}</td><td>${r.MP}</td><td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td><td>${r.GF}</td><td>${r.GA}</td><td>${r.GD}</td>`; tbody.appendChild(tr); });
-      tbl.appendChild(tbody); el.appendChild(tbl);
-    } catch(e){ el.innerHTML = '<div class="small">Błąd przy wyliczaniu tabeli.</div>'; console.error(e); }
-  }
+  // Standings
+  async function renderStandings(){ const el = document.getElementById('standingsList'); el.innerHTML = ''; try { const clubsSnap = await getDocs(collection(db,'kluby')); const matchesSnap = await getDocs(collection(db,'mecze')); if(clubsSnap.empty || matchesSnap.empty){ el.innerHTML = '<div class="small">Brak danych do wyliczeń.</div>'; return; } const map = {}; clubsSnap.forEach(c => { const d = c.data(); map[d.name] = { club: d.name, MP:0,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0 }; }); matchesSnap.forEach(mSnap => { const m = mSnap.data(); if(typeof m.homeGoals!=='number' || typeof m.awayGoals!=='number') return; if(!map[m.home] || !map[m.away]) return; map[m.home].MP++; map[m.away].MP++; map[m.home].GF += m.homeGoals; map[m.home].GA += m.awayGoals; map[m.away].GF += m.awayGoals; map[m.away].GA += m.homeGoals; if(m.homeGoals>m.awayGoals){ map[m.home].W++; map[m.home].P+=3; map[m.away].L++; } else if(m.homeGoals<m.awayGoals){ map[m.away].W++; map[m.away].P+=3; map[m.home].L++; } else { map[m.home].D++; map[m.away].D++; map[m.home].P++; map[m.away].P++; } }); Object.values(map).forEach(r=> r.GD = r.GF - r.GA); const sorted = Object.values(map).sort((a,b)=> (b.P - a.P) || (b.GD - a.GD) || (b.GF - a.GF)); const tbl = document.createElement('table'); tbl.className='table'; tbl.innerHTML = '<thead><tr><th>#</th><th>Klub</th><th>MP</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th></tr></thead>'; const tbody = document.createElement('tbody'); sorted.forEach((r,i)=> { const tr = document.createElement('tr'); tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.club)}</td><td>${r.MP}</td><td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td><td>${r.GF}</td><td>${r.GA}</td><td>${r.GD}</td>`; tbody.appendChild(tr); }); tbl.appendChild(tbody); el.appendChild(tbl); } catch(e){ el.innerHTML = '<div class="small">Błąd przy wyliczaniu tabeli.</div>'; console.error(e); } }
 
-  // ---------- Ticker (najbliższy mecz) ----------
-  async function updateTicker(){
-    try {
-      const snap = await getDocs(query(collection(db,'mecze'), orderBy('date','asc')));
-      const arr = [];
-      snap.forEach(s=> arr.push(s.data()));
-      // find first upcoming (>= today)
-      const now = new Date();
-      const upcoming = arr.filter(m => {
-        if(!m.date) return false;
-        const d = new Date(m.date + 'T' + (m.time||'00:00'));
-        return d >= now;
-      }).sort((a,b)=> (a.date+(a.time||'')) > (b.date+(b.time||'')) ? 1 : -1);
-      if(upcoming.length===0){
-        tickerInner.textContent = 'Brak zaplanowanych meczów.';
-      } else {
-        const m = upcoming[0];
-        tickerInner.innerHTML = `Najbliższy: <strong>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</strong> • ${escapeHtml(m.date)} ${escapeHtml(m.time||'') } • ${escapeHtml(m.place||'')}`;
-      }
-    } catch(e){ tickerInner.textContent = 'Błąd ładowania terminarza.'; console.error(e); }
-  }
+  // Ticker
+  async function updateTicker(){ try { const snap = await getDocs(query(collection(db,'mecze'), orderBy('date','asc'))); const arr = []; snap.forEach(s=> arr.push(s.data())); const now = new Date(); const upcoming = arr.filter(m => { if(!m.date) return false; const d = new Date(m.date + 'T' + (m.time||'00:00')); return d >= now; }).sort((a,b)=> (a.date+(a.time||'')) > (b.date+(b.time||'')) ? 1 : -1); if(upcoming.length===0){ tickerInner.textContent = 'Brak zaplanowanych meczów.'; } else { const m = upcoming[0]; tickerInner.innerHTML = `Najbliższy: <strong>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</strong> • ${escapeHtml(m.date)} ${escapeHtml(m.time||'') } • ${escapeHtml(m.place||'')}`; } } catch(e){ tickerInner.textContent = 'Błąd ładowania terminarza.'; console.error(e); } }
 
-  // ---------- Export / Import ----------
-  document.getElementById('exportAll').addEventListener('click', async ()=>{
-    if(!confirm('Pobrać backup wszystkich kolekcji?')) return;
-    try {
-      const [klubySnap, meczeSnap, newsSnap] = await Promise.all([getDocs(collection(db,'kluby')), getDocs(collection(db,'mecze')), getDocs(collection(db,'aktualnosci'))]);
-      const data = { kluby: klubySnap.docs.map(d=>({id:d.id,data:d.data()})), mecze: meczeSnap.docs.map(d=>({id:d.id,data:d.data()})), aktualnosci: newsSnap.docs.map(d=>({id:d.id,data:d.data()})) };
-      const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'speedrower_backup.json'; a.click(); URL.revokeObjectURL(url);
-    } catch(e){ alert('Błąd eksportu: '+e.message); }
-  });
+  // Export/Import
+  document.getElementById('exportAll').addEventListener('click', async ()=>{ if(!confirm('Pobrać backup wszystkich kolekcji?')) return; try { const [klubySnap, meczeSnap, newsSnap] = await Promise.all([getDocs(collection(db,'kluby')), getDocs(collection(db,'mecze')), getDocs(collection(db,'aktualnosci'))]); const data = { kluby: klubySnap.docs.map(d=>({id:d.id,data:d.data()})), mecze: meczeSnap.docs.map(d=>({id:d.id,data:d.data()})), aktualnosci: newsSnap.docs.map(d=>({id:d.id,data:d.data()})) }; const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'speedrower_backup.json'; a.click(); URL.revokeObjectURL(url); } catch(e){ alert('Błąd eksportu: '+e.message); } });
 
-  document.getElementById('importAll').addEventListener('change', async (e)=>{
-    if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.');
-    const f = e.target.files[0]; if(!f) return;
-    const txt = await f.text();
-    try {
-      const json = JSON.parse(txt);
-      if(json.kluby){ for(const k of json.kluby) await addDoc(collection(db,'kluby'), k.data); }
-      if(json.mecze){ for(const m of json.mecze) await addDoc(collection(db,'mecze'), m.data); }
-      if(json.aktualnosci){ for(const n of json.aktualnosci) await addDoc(collection(db,'aktualnosci'), n.data); }
-      showToast('Import zakończony');
-      loadClubs(); loadMatches(); loadNews(); renderStandings(); updateTicker(); updateStats();
-    } catch(err){ alert('Błąd importu: '+err.message); }
-  });
+  document.getElementById('importAll').addEventListener('change', async (e)=>{ if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.'); const f = e.target.files[0]; if(!f) return; const txt = await f.text(); try { const json = JSON.parse(txt); if(json.kluby){ for(const k of json.kluby) await addDoc(collection(db,'kluby'), k.data); } if(json.mecze){ for(const m of json.mecze) await addDoc(collection(db,'mecze'), m.data); } if(json.aktualnosci){ for(const n of json.aktualnosci) await addDoc(collection(db,'aktualnosci'), n.data); } showToast('Import zakończony'); loadClubs(); loadMatches(); loadNews(); renderStandings(); updateTicker(); updateStats(); } catch(err){ alert('Błąd importu: '+err.message); } });
 
-  // ---------- Stats ----------
-  async function updateStats(){
-    try {
-      const [klubySnap, meczeSnap, newsSnap] = await Promise.all([getDocs(collection(db,'kluby')), getDocs(collection(db,'mecze')), getDocs(collection(db,'aktualnosci'))]);
-      document.getElementById('stats').innerHTML = `<strong>${klubySnap.size}</strong> kluby • <strong>${meczeSnap.size}</strong> meczów • <strong>${newsSnap.size}</strong> aktualności`;
-    } catch(e){ document.getElementById('stats').innerHTML = '—'; }
-  }
+  // Stats
+  async function updateStats(){ try { const [klubySnap, meczeSnap, newsSnap] = await Promise.all([getDocs(collection(db,'kluby')), getDocs(collection(db,'mecze')), getDocs(collection(db,'aktualnosci'))]); document.getElementById('stats').innerHTML = `<strong>${klubySnap.size}</strong> kluby • <strong>${meczeSnap.size}</strong> meczów • <strong>${newsSnap.size}</strong> aktualności`; } catch(e){ document.getElementById('stats').innerHTML = '—'; } }
 
-  // initial loads
+  // init
   await Promise.all([loadNews(), loadClubs(), loadMatches(), renderStandings(), updateTicker(), updateStats()]);
 
-  // helper: global doc reference for delete (used earlier)
-  import { doc as docRef } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-  window.doc = docRef; // available if needed in console
-
+  function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
 </script>
 </body>
 </html>
