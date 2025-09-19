@@ -22,17 +22,14 @@
     min-height:100vh;
   }
   .wrap{max-width:var(--maxw);margin:20px auto;padding:18px}
-  /* Banner */
   .hero{
     display:flex;align-items:center;justify-content:space-between;gap:12px;
     background:linear-gradient(90deg,var(--g1),var(--g2));
     border-radius:18px;padding:18px;color:#fff;box-shadow:0 18px 50px rgba(0,0,0,0.45);
   }
-  .logo{
-    display:flex;align-items:center;gap:12px;
-  }
-  .logo svg{width:64px;height:64px;flex:0 0 64px}
-  .hero h1{margin:0;font-size:22px;line-height:1;color:#fff;font-weight:900;text-shadow:0 6px 22px rgba(0,0,0,0.45)}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo svg{width:56px;height:56px;flex:0 0 56px}
+  .hero h1{margin:0;font-size:20px;line-height:1;color:#fff;font-weight:900;text-shadow:0 6px 22px rgba(0,0,0,0.45)}
   .hero .small{color:rgba(255,255,255,0.95);margin-top:6px;font-weight:600}
   nav{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
   .btn{background:#fff;color:var(--accentText);padding:8px 12px;border-radius:12px;border:none;cursor:pointer;font-weight:800}
@@ -57,7 +54,6 @@
   .hidden{display:none}
   #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:30px;background:linear-gradient(90deg,var(--g1),var(--g2));color:#071011;padding:12px 18px;border-radius:999px;box-shadow:0 12px 40px rgba(0,0,0,0.5);display:none;z-index:20000}
   #confetti{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:20000}
-  /* club list small card */
   .club-card{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
   .searchRow{display:flex;gap:8px;align-items:center}
   .statCounter{font-size:20px;font-weight:800}
@@ -65,7 +61,6 @@
   th,td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03);text-align:left}
   th{color:var(--muted);font-weight:700}
   .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:12px}
-  /* modal basics */
   .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999}
   .modal-box{background:var(--card);padding:16px;border-radius:12px;max-width:980px;width:94%;max-height:90%;overflow:auto;border:1px solid var(--glass)}
 </style>
@@ -74,7 +69,6 @@
 <div class="wrap">
   <div class="hero">
     <div class="logo">
-      <!-- simple SVG logo -->
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden>
         <defs>
           <linearGradient id="g" x1="0" x2="1">
@@ -94,7 +88,6 @@
     <div style="display:flex;gap:10px;align-items:center">
       <div class="badge">Zieleń • Fiolet</div>
       <button id="openPanelBtn" class="btn-ghost" type="button">Panel organizatora</button>
-      <!-- short link -->
       <a class="btn" href="https://skibidibyrdas-dotcom.github.io/espeedrower/" target="_blank" rel="noopener">Odwiedź</a>
     </div>
   </div>
@@ -115,7 +108,7 @@
     <main>
       <section id="home" class="card view">
         <h2>Witaj</h2>
-        <p class="small">Panel organizatora jest chroniony hasłem. Dodawaj aktualności i mecze szybko i prosto — wszystkie zmiany zapisują się w Firebase i są widoczne od razu.</p>
+        <p class="small">Panel organizatora jest chroniony hasłem. Dodawaj aktualności i mecze — wszystko zapisuje się w Firebase i jest widoczne od razu.</p>
 
         <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
           <div class="card" style="min-width:220px;flex:1">
@@ -195,7 +188,7 @@
     </aside>
   </div>
 
-  <div class="footer">© 2025 Speedrower League Junior — hasło: <strong>Speedrower</strong></div>
+  <div class="footer">© 2025 Speedrower League Junior</div>
 </div>
 
 <!-- Panel modal -->
@@ -204,7 +197,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
         <strong style="color:var(--g1)">Panel organizatora</strong>
-        <div class="small">Wpisz hasło, aby zarządzać ligą</div>
+        <div class="small">Wpisz hasło, aby zarządzać</div>
       </div>
       <div><button id="closePanel" class="btn-ghost" type="button">Zamknij</button></div>
     </div>
@@ -264,7 +257,7 @@
   </div>
 </div>
 
-<!-- club detail modal -->
+<!-- Club modal -->
 <div id="clubModal" class="modal hidden" aria-hidden>
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -279,10 +272,9 @@
 <div id="toast">Gotowe!</div>
 <canvas id="confetti"></canvas>
 
-<!-- Firebase + app logic -->
 <script type="module">
   // ---------- ADMIN PASS ----------
-  const ADMIN_PASS = 'Speedrower'; // zmień jeśli chcesz. UWAGA: widoczne w źródle
+  const ADMIN_PASS = 'Speedrower'; // UWAGA: widoczne w źródle - na później warto zmienić na auth
   // ---------------------------------
 
   // Firebase imports
@@ -290,7 +282,7 @@
   import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
   import { getStorage, ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 
-  // ====== YOUR FIREBASE CONFIG (you provided earlier) ======
+  // Twoja konfiguracja (wkleiłeś wcześniej)
   const firebaseConfig = {
     apiKey: "AIzaSyDNi83_zoH8cDSpYoTS4XtoGLPDKnypG1A",
     authDomain: "speedrower-junior-league.firebaseapp.com",
@@ -300,7 +292,6 @@
     appId: "1:151487950214:web:54742c6cae06f267661007",
     measurementId: "G-BTW6P3QMS3"
   };
-  // =========================================================
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
@@ -329,13 +320,16 @@
   views.forEach(v=> v.classList.add('hidden'));
   document.getElementById('home').classList.remove('hidden');
 
-  // panel open/close
+  // panel open (DO NOT auto-open modal on load)
   openPanelBtn.addEventListener('click', ()=> {
     panelModal.classList.remove('hidden');
     if(sessionStorage.getItem('sr_admin')==='1') showAdmin(true);
   });
+
+  // close button (safe)
   closePanel.addEventListener('click', ()=> panelModal.classList.add('hidden'));
 
+  // universal show/hide admin
   function showAdmin(on){
     if(on){
       adminControls.classList.remove('hidden');
@@ -348,11 +342,12 @@
     }
   }
 
-  // safe attachment: ensure DOM ready (module executes after parsing, but still)
+  // DOM robust handlers
   document.addEventListener('DOMContentLoaded', ()=> {
-    // login button (robust)
-    if(loginBtn){
-      loginBtn.addEventListener('click', ()=> {
+    // login
+    const login = document.getElementById('loginBtn');
+    if(login){
+      login.addEventListener('click', ()=> {
         const v = (adminPassInput.value||'').trim();
         if(!v) return alert('Wpisz hasło.');
         if(v === ADMIN_PASS){
@@ -363,16 +358,36 @@
       });
     }
 
-    // quick close club modal
-    document.getElementById('closeClubModal').addEventListener('click', ()=> {
-      document.getElementById('clubModal').classList.add('hidden');
+    // close modals with ESC or click outside
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape' || e.key === 'Esc'){
+        if(!panelModal.classList.contains('hidden')) panelModal.classList.add('hidden');
+        const clubModal = document.getElementById('clubModal'); if(clubModal && !clubModal.classList.contains('hidden')) clubModal.classList.add('hidden');
+      }
     });
-    // close panel when clicking outside (optional)
     panelModal.addEventListener('click', (e)=> { if(e.target === panelModal) panelModal.classList.add('hidden'); });
-    document.getElementById('clubModal').addEventListener('click', (e)=> { if(e.target === document.getElementById('clubModal')) document.getElementById('clubModal').classList.add('hidden'); });
+    const clubModal = document.getElementById('clubModal');
+    if(clubModal) clubModal.addEventListener('click', (e)=> { if(e.target === clubModal) clubModal.classList.add('hidden'); });
+
+    // emergency close extra (in case UI glitched)
+    if(!document.getElementById('panelCloseExtra')){
+      const btn = document.createElement('button');
+      btn.id = 'panelCloseExtra';
+      btn.type = 'button';
+      btn.className = 'btn-ghost';
+      btn.textContent = 'Zamknij panel';
+      btn.style.position = 'fixed'; btn.style.right = '18px'; btn.style.bottom = '18px'; btn.style.zIndex = 99999; btn.style.display = 'none';
+      btn.addEventListener('click', ()=> { panelModal.classList.add('hidden'); });
+      document.body.appendChild(btn);
+      // show it only when modal stuck open
+      setInterval(()=> { const extra = document.getElementById('panelCloseExtra'); if(panelModal && !panelModal.classList.contains('hidden')) extra.style.display='block'; else extra.style.display='none'; }, 700);
+    }
+
+    // close club modal
+    document.getElementById('closeClubModal').addEventListener('click', ()=> document.getElementById('clubModal').classList.add('hidden'));
   });
 
-  // UI helpers
+  // helpers
   function showToast(msg, t=2200){ toast.textContent = msg; toast.style.display='block'; setTimeout(()=> toast.style.display='none', t); }
   function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
   function uid(p='id'){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -388,11 +403,7 @@
     let t=0;
     const raf = ()=> {
       t++; ctx.clearRect(0,0,c.width,c.height);
-      pieces.forEach(p=>{
-        p.x += p.vx; p.y += p.vy; p.vy += 0.12;
-        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot * Math.PI/180);
-        ctx.fillStyle = p.col; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
-      });
+      pieces.forEach(p=>{ p.x += p.vx; p.y += p.vy; p.vy += 0.12; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot * Math.PI/180); ctx.fillStyle = p.col; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); });
       if(t<160) requestAnimationFrame(raf); else ctx.clearRect(0,0,c.width,c.height);
     };
     raf();
@@ -451,17 +462,14 @@
 
   // ---------- CLUBS ----------
   const clubsList = document.getElementById('clubsList');
-  let clubsCache = []; // keep local cache for modal/search
+  let clubsCache = [];
   async function loadClubs(){
     clubsList.innerHTML = '';
     clubsCache = [];
     try {
       const snap = await getDocs(collection(db,'kluby'));
       if(snap.empty){ clubsList.innerHTML = '<div class="small">Brak klubów.</div>'; return; }
-      snap.forEach(s=>{
-        const c = s.data(); c._id = s.id;
-        clubsCache.push(c);
-      });
+      snap.forEach(s=> { const c = s.data(); c._id = s.id; clubsCache.push(c); });
       renderClubs(clubsCache);
     } catch(e){ clubsList.innerHTML = '<div class="small">Błąd ładowania klubów.</div>'; console.error(e); }
   }
@@ -506,14 +514,10 @@
       categories: Array.from(document.getElementById('clubCats').selectedOptions).map(o=>o.value),
       createdAt: serverTimestamp(), author: 'Organizer (hasło)'
     };
-    try { await addDoc(collection(db,'kluby'), data); showToast('Dodano klub'); clearClubForm(); await loadClubs(); updateStats(); } catch(e){ alert('Błąd: '+e.message); }
+    try { await addDoc(collection(db,'kluby'), data); showToast('Dodano klub'); clearClubForm(); await loadClubs(); await updateStats(); } catch(e){ alert('Błąd: '+e.message); }
   });
 
-  function clearClubForm(){
-    document.getElementById('clubName').value=''; document.getElementById('clubCity').value=''; document.getElementById('clubShort').value='';
-    document.getElementById('clubDesc').value=''; document.getElementById('clubAchievements').value=''; document.getElementById('clubRoster').value='';
-    Array.from(document.getElementById('clubCats').options).forEach(o=>o.selected=false);
-  }
+  function clearClubForm(){ document.getElementById('clubName').value=''; document.getElementById('clubCity').value=''; document.getElementById('clubShort').value=''; document.getElementById('clubDesc').value=''; document.getElementById('clubAchievements').value=''; document.getElementById('clubRoster').value=''; Array.from(document.getElementById('clubCats').options).forEach(o=>o.selected=false); }
   document.getElementById('clearClub').addEventListener('click', clearClubForm);
 
   // search/filter clubs
@@ -608,9 +612,9 @@
       snap.forEach(s=> arr.push(s.data()));
       const now = new Date();
       const upcoming = arr.filter(m => { if(!m.date) return false; const d = new Date(m.date + 'T' + (m.time||'00:00')); return d >= now; }).sort((a,b)=> (a.date+(a.time||'')) > (b.date+(b.time||'')) ? 1 : -1);
-      if(upcoming.length===0) tickerInner.textContent = 'Brak zaplanowanych meczów.';
-      else { const m = upcoming[0]; tickerInner.innerHTML = `Najbliższy: <strong>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</strong> • ${escapeHtml(m.date)} ${escapeHtml(m.time||'')} • ${escapeHtml(m.place||'')}`; }
-    } catch(e){ tickerInner.textContent = 'Błąd ładowania terminarza.'; console.error(e); }
+      if(upcoming.length===0) document.getElementById('tickerInner').textContent = 'Brak zaplanowanych meczów.';
+      else { const m = upcoming[0]; document.getElementById('tickerInner').innerHTML = `Najbliższy: <strong>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</strong> • ${escapeHtml(m.date)} ${escapeHtml(m.time||'')} • ${escapeHtml(m.place||'')}`; }
+    } catch(e){ document.getElementById('tickerInner').textContent = 'Błąd ładowania terminarza.'; console.error(e); }
   }
 
   // ---------- EXPORT / IMPORT ----------
@@ -660,9 +664,9 @@
   // initial load
   await Promise.all([loadNews(), loadClubs(), loadMatches(), renderStandings(), updateTicker(), updateStats()]);
 
-  // expose some helpers for console debugging if needed
+  // expose helpers for console if needed
   window.sr = { loadNews, loadClubs, loadMatches, renderStandings, updateTicker, updateStats };
-
 </script>
+
 </body>
 </html>
