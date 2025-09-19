@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="pl">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Speedrower League Junior</title>
-<link rel="icon" href="data:,"/>
+<link rel="icon" href="data:," />
 <style>
   :root{
     --bg:#040406; --card:#0e0f11; --muted:#9aa0a6;
@@ -13,13 +13,12 @@
   }
   *{box-sizing:border-box}
   body{
-    margin:0; font-family:Inter,system-ui,Arial,sans-serif; color:#eef3f6;
+    margin:0;font-family:Inter,system-ui,Arial,sans-serif;color:#eef3f6;
     background:
       radial-gradient(1200px 600px at 10% 10%, rgba(127,240,138,0.05), transparent 6%),
       radial-gradient(1000px 500px at 90% 85%, rgba(176,112,255,0.04), transparent 6%),
       linear-gradient(180deg,#020203,var(--bg));
-    -webkit-font-smoothing:antialiased;
-    min-height:100vh;
+    -webkit-font-smoothing:antialiased;min-height:100vh;
   }
   .wrap{max-width:var(--maxw);margin:20px auto;padding:18px}
   .hero{
@@ -61,8 +60,11 @@
   th,td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03);text-align:left}
   th{color:var(--muted);font-weight:700}
   .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:12px}
+  /* modal */
   .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999}
   .modal-box{background:var(--card);padding:16px;border-radius:12px;max-width:980px;width:94%;max-height:90%;overflow:auto;border:1px solid var(--glass)}
+  /* emergency close button */
+  #panelCloseExtra{position:fixed;right:18px;bottom:18px;z-index:99999}
 </style>
 </head>
 <body>
@@ -81,7 +83,7 @@
       </svg>
       <div>
         <h1 class="fancyTitle">Speedrower League Junior</h1>
-        <div class="small">Liga do 18 lat — terminarz, kluby, wyniki</div>
+        <div class="small">Liga do 18 lat — terminarz, kluby, aktualności</div>
       </div>
     </div>
 
@@ -191,7 +193,7 @@
   <div class="footer">© 2025 Speedrower League Junior</div>
 </div>
 
-<!-- Panel modal -->
+<!-- Panel Modal -->
 <div id="panelModal" class="modal hidden" aria-hidden>
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -206,9 +208,9 @@
 
     <div id="loginWrap">
       <label class="small">Hasło:</label>
-      <input id="adminPass" type="password" class="input" placeholder="Hasło organizatora"/>
+      <input id="adminPass" type="password" class="input" placeholder="Hasło organizatora" />
       <div style="margin-top:8px"><button id="loginBtn" class="btn" type="button">Zaloguj</button></div>
-      <div class="small" style="margin-top:8px;color:var(--muted)">Hasło jest sprawdzane lokalnie (szybkie uruchomienie). Możemy przerzucić na Google Sign-In później.</div>
+      <div class="small" style="margin-top:8px;color:var(--muted)">Hasło jest sprawdzane lokalnie (możemy w przyszłości dodać Google Sign-In).</div>
     </div>
 
     <div id="adminControls" class="hidden" style="margin-top:12px">
@@ -269,20 +271,22 @@
   </div>
 </div>
 
+<button id="panelCloseExtra" class="btn-ghost hidden" type="button">Zamknij panel</button>
+
 <div id="toast">Gotowe!</div>
 <canvas id="confetti"></canvas>
 
+<!-- Firebase + App logic -->
 <script type="module">
-  // ---------- ADMIN PASS ----------
-  const ADMIN_PASS = 'Speedrower'; // UWAGA: widoczne w źródle - na później warto zmienić na auth
-  // ---------------------------------
+  // -------------------- ADMIN PASS --------------------
+  const ADMIN_PASS = 'Speedrower'; // znasz hasło; nie pokazujemy go na stronie
+  // ----------------------------------------------------
 
-  // Firebase imports
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-  import { getStorage, ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
+  import { getStorage, ref as sref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 
-  // Twoja konfiguracja (wkleiłeś wcześniej)
+  // ---- Twoja konfiguracja Firebase (już wklejona zgodnie z tym co podałeś) ----
   const firebaseConfig = {
     apiKey: "AIzaSyDNi83_zoH8cDSpYoTS4XtoGLPDKnypG1A",
     authDomain: "speedrower-junior-league.firebaseapp.com",
@@ -292,6 +296,7 @@
     appId: "1:151487950214:web:54742c6cae06f267661007",
     measurementId: "G-BTW6P3QMS3"
   };
+  // -----------------------------------------------------------------------------
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
@@ -309,8 +314,9 @@
   const adminControls = document.getElementById('adminControls');
   const toast = document.getElementById('toast');
   const confettiCanv = document.getElementById('confetti');
+  const panelCloseExtra = document.getElementById('panelCloseExtra');
 
-  // nav handlers
+  // nav
   showBtns.forEach(b=> b.addEventListener('click', ()=> {
     const id = b.dataset.show;
     views.forEach(v=> v.classList.add('hidden'));
@@ -320,13 +326,14 @@
   views.forEach(v=> v.classList.add('hidden'));
   document.getElementById('home').classList.remove('hidden');
 
-  // panel open (DO NOT auto-open modal on load)
+  // panel open
   openPanelBtn.addEventListener('click', ()=> {
     panelModal.classList.remove('hidden');
+    // jeśli już jesteś adminem - pokaż kontrolki
     if(sessionStorage.getItem('sr_admin')==='1') showAdmin(true);
   });
 
-  // close button (safe)
+  // close button
   closePanel.addEventListener('click', ()=> panelModal.classList.add('hidden'));
 
   // universal show/hide admin
@@ -342,12 +349,11 @@
     }
   }
 
-  // DOM robust handlers
+  // robust DOM handlers
   document.addEventListener('DOMContentLoaded', ()=> {
     // login
-    const login = document.getElementById('loginBtn');
-    if(login){
-      login.addEventListener('click', ()=> {
+    if(loginBtn){
+      loginBtn.addEventListener('click', ()=> {
         const v = (adminPassInput.value||'').trim();
         if(!v) return alert('Wpisz hasło.');
         if(v === ADMIN_PASS){
@@ -369,22 +375,15 @@
     const clubModal = document.getElementById('clubModal');
     if(clubModal) clubModal.addEventListener('click', (e)=> { if(e.target === clubModal) clubModal.classList.add('hidden'); });
 
-    // emergency close extra (in case UI glitched)
-    if(!document.getElementById('panelCloseExtra')){
-      const btn = document.createElement('button');
-      btn.id = 'panelCloseExtra';
-      btn.type = 'button';
-      btn.className = 'btn-ghost';
-      btn.textContent = 'Zamknij panel';
-      btn.style.position = 'fixed'; btn.style.right = '18px'; btn.style.bottom = '18px'; btn.style.zIndex = 99999; btn.style.display = 'none';
-      btn.addEventListener('click', ()=> { panelModal.classList.add('hidden'); });
-      document.body.appendChild(btn);
-      // show it only when modal stuck open
-      setInterval(()=> { const extra = document.getElementById('panelCloseExtra'); if(panelModal && !panelModal.classList.contains('hidden')) extra.style.display='block'; else extra.style.display='none'; }, 700);
-    }
+    // emergency close: show extra button only if modal stuck open
+    setInterval(()=> {
+      if(panelModal && !panelModal.classList.contains('hidden')) panelCloseExtra.classList.remove('hidden'); else panelCloseExtra.classList.add('hidden');
+    }, 600);
+    panelCloseExtra.addEventListener('click', ()=> { panelModal.classList.add('hidden'); sessionStorage.removeItem('sr_admin'); });
 
     // close club modal
-    document.getElementById('closeClubModal').addEventListener('click', ()=> document.getElementById('clubModal').classList.add('hidden'));
+    const closeClubModal = document.getElementById('closeClubModal');
+    if(closeClubModal) closeClubModal.addEventListener('click', ()=> document.getElementById('clubModal').classList.add('hidden'));
   });
 
   // helpers
@@ -482,7 +481,6 @@
       div.innerHTML = `<strong>${escapeHtml(c.name)}</strong><div class="small">${escapeHtml(c.city||'')} ${c.short?('• '+escapeHtml(c.short)):""}</div><div style="margin-top:6px" class="small">${(c.categories||[]).join(', ')}</div><div style="margin-top:8px"><button class="btn-ghost" data-id="${c._id}" type="button">Szczegóły</button></div>`;
       clubsList.appendChild(div);
     });
-    // attach details handlers
     clubsList.querySelectorAll('button[data-id]').forEach(btn=>{
       btn.addEventListener('click', async (e)=>{
         const id = e.currentTarget.dataset.id;
@@ -520,7 +518,6 @@
   function clearClubForm(){ document.getElementById('clubName').value=''; document.getElementById('clubCity').value=''; document.getElementById('clubShort').value=''; document.getElementById('clubDesc').value=''; document.getElementById('clubAchievements').value=''; document.getElementById('clubRoster').value=''; Array.from(document.getElementById('clubCats').options).forEach(o=>o.selected=false); }
   document.getElementById('clearClub').addEventListener('click', clearClubForm);
 
-  // search/filter clubs
   document.getElementById('clubSearch').addEventListener('input', ()=> applyClubFilter());
   document.getElementById('clubFilter').addEventListener('change', ()=> applyClubFilter());
   function applyClubFilter(){
@@ -661,12 +658,12 @@
     requestAnimationFrame(raf);
   }
 
-  // initial load
+  // initial loads
   await Promise.all([loadNews(), loadClubs(), loadMatches(), renderStandings(), updateTicker(), updateStats()]);
 
-  // expose helpers for console if needed
+  // helpers for debugging
   window.sr = { loadNews, loadClubs, loadMatches, renderStandings, updateTicker, updateStats };
-</script>
 
+</script>
 </body>
 </html>
