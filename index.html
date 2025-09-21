@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="pl">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Speedrower League Junior</title>
 <link rel="icon" href="data:,"/>
@@ -108,7 +108,7 @@
     <main>
       <section id="home" class="card view">
         <h2>Witaj</h2>
-        <p class="small">Na tej stronie masz możliwość sprawdzania ligii , klubów oraz najbliższych meczów speedroweru.</p>
+        <p class="small">Sprawdzaj mecze , aktualności i kluby jednym kliknięciem!</p>
 
         <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
           <div class="card" style="min-width:220px;flex:1">
@@ -274,6 +274,7 @@
 <div id="toast">Gotowe!</div>
 <canvas id="confetti"></canvas>
 
+<!-- App logic + Firebase -->
 <script type="module">
   // ---------- ADMIN PASS ----------
   const ADMIN_PASS = 'Speedrower';
@@ -284,6 +285,7 @@
   import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
   import { getStorage, ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 
+  // ------------------ Twój firebaseConfig ------------------
   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyDNi83_zoH8cDSpYoTS4XtoGLPDKnypG1A",
@@ -294,6 +296,7 @@
     appId: "1:151487950214:web:54742c6cae06f267661007",
     measurementId: "G-BTW6P3QMS3"
   };
+  // ---------------------------------------------------------
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
@@ -311,6 +314,7 @@
   const adminControls = document.getElementById('adminControls');
   const toast = document.getElementById('toast');
   const confettiCanv = document.getElementById('confetti');
+  const panelCloseExtra = document.getElementById('panelCloseExtra');
 
   // nav handlers
   showBtns.forEach(b=> b.addEventListener('click', ()=> {
@@ -341,6 +345,16 @@
     }
   }
 
+  // Safety: global handlers to avoid UI freeze if FB throws permission errors
+  window.addEventListener('unhandledrejection', function(ev){
+    console.warn('Unhandled rejection (suppressed):', ev.reason);
+    try { showToast('Problem z serwerem / uprawnieniami. Sprawdź reguły Firestore.'); } catch(e){}
+    ev.preventDefault();
+  });
+  window.addEventListener('error', function(ev){
+    console.error('Global error (suppressed):', ev.error || ev.message);
+  });
+
   // DOM robust handlers
   document.addEventListener('DOMContentLoaded', ()=> {
     if(loginBtn){
@@ -366,16 +380,16 @@
     if(clubModal) clubModal.addEventListener('click', (e)=> { if(e.target === clubModal) clubModal.classList.add('hidden'); });
 
     setInterval(()=> {
-      if(panelModal && !panelModal.classList.contains('hidden')) document.getElementById('panelCloseExtra').classList.remove('hidden'); else document.getElementById('panelCloseExtra').classList.add('hidden');
+      if(panelModal && !panelModal.classList.contains('hidden')) panelCloseExtra.classList.remove('hidden'); else panelCloseExtra.classList.add('hidden');
     }, 700);
-    document.getElementById('panelCloseExtra').addEventListener('click', ()=> { panelModal.classList.add('hidden'); sessionStorage.removeItem('sr_admin'); });
+    panelCloseExtra.addEventListener('click', ()=> { panelModal.classList.add('hidden'); sessionStorage.removeItem('sr_admin'); });
 
     const closeClubModal = document.getElementById('closeClubModal');
     if(closeClubModal) closeClubModal.addEventListener('click', ()=> document.getElementById('clubModal').classList.add('hidden'));
   });
 
   // helpers
-  function showToast(msg, t=2200){ toast.textContent = msg; toast.style.display='block'; setTimeout(()=> toast.style.display='none', t); }
+  function showToast(msg, t=3500){ toast.textContent = msg; toast.style.display='block'; setTimeout(()=> toast.style.display='none', t); }
   function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
   function uid(p='id'){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
@@ -413,8 +427,8 @@
   // ---------- NEWS ----------
   const newsList = document.getElementById('newsList');
   async function loadNews(){
-    newsList.innerHTML = 'Ładowanie...';
-    try {
+    try{
+      newsList.innerHTML = 'Ładowanie...';
       const q = query(collection(db,'aktualnosci'), orderBy('createdAt','desc'));
       const snap = await getDocs(q);
       newsList.innerHTML = '';
@@ -428,7 +442,11 @@
         div.innerHTML = `<strong>${escapeHtml(n.title)}</strong><div class="small">${date}${n.author?(' • '+escapeHtml(n.author)):""}</div><div style="margin-top:8px">${escapeHtml(n.content)}</div>${imgs}`;
         newsList.appendChild(div);
       });
-    } catch(e){ newsList.innerHTML = '<div class="small">Błąd wczytywania aktualności.</div>'; console.error(e); }
+    } catch(e){
+      console.error('loadNews error', e);
+      newsList.innerHTML = '<div class="small">Błąd wczytywania aktualności. Sprawdź uprawnienia Firestore.</div>';
+      throw e;
+    }
   }
 
   // add news
@@ -444,21 +462,25 @@
       await addDoc(collection(db,'aktualnosci'), { title, content, images: imgs, author: 'Organizer (hasło)', createdAt: serverTimestamp() });
       document.getElementById('newsTitle').value=''; document.getElementById('newsContent').value=''; document.getElementById('newsFiles').value='';
       showToast('Aktualność dodana'); popConfetti(); await loadNews(); await updateTicker(); await updateStats();
-    } catch(e){ alert('Błąd: '+e.message); console.error(e); } finally { btn.disabled=false; btn.textContent='Dodaj aktualność'; }
+    } catch(e){ alert('Błąd: '+(e.message||e)); console.error(e); } finally { btn.disabled=false; btn.textContent='Dodaj aktualność'; }
   });
 
   // ---------- CLUBS ----------
   const clubsList = document.getElementById('clubsList');
   let clubsCache = [];
   async function loadClubs(){
-    clubsList.innerHTML = '';
-    clubsCache = [];
-    try {
+    try{
+      clubsList.innerHTML = '';
+      clubsCache = [];
       const snap = await getDocs(collection(db,'kluby'));
       if(snap.empty){ clubsList.innerHTML = '<div class="small">Brak klubów.</div>'; return; }
       snap.forEach(s=> { const c = s.data(); c._id = s.id; clubsCache.push(c); });
       renderClubs(clubsCache);
-    } catch(e){ clubsList.innerHTML = '<div class="small">Błąd ładowania klubów.</div>'; console.error(e); }
+    } catch(e){
+      console.error('loadClubs error', e);
+      clubsList.innerHTML = '<div class="small">Błąd ładowania klubów. Sprawdź uprawnienia Firestore.</div>';
+      throw e;
+    }
   }
 
   function renderClubs(arr){
@@ -500,7 +522,7 @@
       categories: Array.from(document.getElementById('clubCats').selectedOptions).map(o=>o.value),
       createdAt: serverTimestamp(), author: 'Organizer (hasło)'
     };
-    try { await addDoc(collection(db,'kluby'), data); showToast('Dodano klub'); clearClubForm(); await loadClubs(); await updateStats(); } catch(e){ alert('Błąd: '+e.message); }
+    try { await addDoc(collection(db,'kluby'), data); showToast('Dodano klub'); clearClubForm(); await loadClubs(); await updateStats(); } catch(e){ alert('Błąd: '+(e.message||e)); console.error(e); }
   });
 
   function clearClubForm(){ document.getElementById('clubName').value=''; document.getElementById('clubCity').value=''; document.getElementById('clubShort').value=''; document.getElementById('clubDesc').value=''; document.getElementById('clubAchievements').value=''; document.getElementById('clubRoster').value=''; Array.from(document.getElementById('clubCats').options).forEach(o=>o.selected=false); }
@@ -520,8 +542,8 @@
   // ---------- MATCHES ----------
   const scheduleList = document.getElementById('scheduleList');
   async function loadMatches(){
-    scheduleList.innerHTML = '';
-    try {
+    try{
+      scheduleList.innerHTML = '';
       const snap = await getDocs(query(collection(db,'mecze'), orderBy('date','asc')));
       if(snap.empty){ scheduleList.innerHTML = '<div class="small">Brak meczów.</div>'; return; }
       const table = document.createElement('table'); table.className='table';
@@ -541,7 +563,11 @@
         tb.appendChild(tr);
       });
       table.appendChild(tb); scheduleList.appendChild(table);
-    } catch(e){ scheduleList.innerHTML = '<div class="small">Błąd ładowania terminarza.</div>'; console.error(e); }
+    } catch(e){
+      console.error('loadMatches error', e);
+      scheduleList.innerHTML = '<div class="small">Błąd wczytywania terminarza. Sprawdź uprawnienia Firestore.</div>';
+      throw e;
+    }
   }
 
   document.getElementById('saveMatch').addEventListener('click', async ()=>{
@@ -556,7 +582,7 @@
     const ag = document.getElementById('matchAwayGoals').value;
     if(!date || !home || !away) return alert('Wypełnij datę, gospodarza i gościa.');
     const data = { date, time, home, away, place, category:cat, homeGoals: hg===''?null: Number(hg), awayGoals: ag===''?null: Number(ag), createdAt: serverTimestamp(), author: 'Organizer (hasło)' };
-    try { await addDoc(collection(db,'mecze'), data); showToast('Mecz dodany'); await loadMatches(); await renderStandings(); await updateTicker(); } catch(e){ alert('Błąd: '+e.message); }
+    try { await addDoc(collection(db,'mecze'), data); showToast('Mecz dodany'); await loadMatches(); await renderStandings(); await updateTicker(); } catch(e){ alert('Błąd: '+(e.message||e)); console.error(e); }
   });
 
   // ---------- STANDINGS ----------
@@ -586,7 +612,7 @@
       const tbody = document.createElement('tbody');
       sorted.forEach((r,i)=> { const tr = document.createElement('tr'); tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.club)}</td><td>${r.MP}</td><td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td><td>${r.GF}</td><td>${r.GA}</td><td>${r.GD}</td>`; tbody.appendChild(tr); });
       tbl.appendChild(tbody); el.appendChild(tbl);
-    } catch(e){ el.innerHTML = '<div class="small">Błąd przy wyliczaniu tabeli.</div>'; console.error(e); }
+    } catch(e){ el.innerHTML = '<div class="small">Błąd przy wyliczaniu tabeli. Sprawdź reguły Firestore.</div>'; console.error(e); throw e; }
   }
 
   // ---------- TICKER ----------
@@ -599,7 +625,7 @@
       const upcoming = arr.filter(m => { if(!m.date) return false; const d = new Date(m.date + 'T' + (m.time||'00:00')); return d >= now; }).sort((a,b)=> (a.date+(a.time||'')) > (b.date+(b.time||'')) ? 1 : -1);
       if(upcoming.length===0) document.getElementById('tickerInner').textContent = 'Brak zaplanowanych meczów.';
       else { const m = upcoming[0]; document.getElementById('tickerInner').innerHTML = `Najbliższy: <strong>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</strong> • ${escapeHtml(m.date)} ${escapeHtml(m.time||'')} • ${escapeHtml(m.place||'')}`; }
-    } catch(e){ document.getElementById('tickerInner').textContent = 'Błąd ładowania terminarza.'; console.error(e); }
+    } catch(e){ document.getElementById('tickerInner').textContent = 'Błąd ładowania terminarza. Sprawdź uprawnienia Firestore.'; console.error(e); throw e; }
   }
 
   // ---------- EXPORT / IMPORT ----------
@@ -610,7 +636,7 @@
       const data = { kluby: klubySnap.docs.map(d=>({id:d.id,data:d.data()})), mecze: meczeSnap.docs.map(d=>({id:d.id,data:d.data()})), aktualnosci: newsSnap.docs.map(d=>({id:d.id,data:d.data()})) };
       const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = 'speedrower_backup.json'; a.click(); URL.revokeObjectURL(url);
-    } catch(e){ alert('Błąd eksportu: '+e.message); }
+    } catch(e){ alert('Błąd eksportu: '+(e.message||e)); console.error(e); }
   });
 
   document.getElementById('importAll').addEventListener('change', async (e)=>{
@@ -623,7 +649,7 @@
       if(json.mecze){ for(const m of json.mecze) await addDoc(collection(db,'mecze'), m.data); }
       if(json.aktualnosci){ for(const n of json.aktualnosci) await addDoc(collection(db,'aktualnosci'), n.data); }
       showToast('Import zakończony'); await loadClubs(); await loadMatches(); await loadNews(); await renderStandings(); await updateTicker(); await updateStats();
-    } catch(err){ alert('Błąd importu: '+err.message); }
+    } catch(err){ alert('Błąd importu: '+(err.message||err)); console.error(err); }
   });
 
   // stats animation
@@ -633,7 +659,7 @@
       animateCount(document.getElementById('statClubs'), klubySnap.size);
       animateCount(document.getElementById('statMatches'), meczeSnap.size);
       animateCount(document.getElementById('statNews'), newsSnap.size);
-    } catch(e){ console.error(e); }
+    } catch(e){ console.error('updateStats error', e); throw e; }
   }
   function animateCount(el, to){
     const from = Number(el.textContent) || 0;
@@ -646,12 +672,56 @@
     requestAnimationFrame(raf);
   }
 
-  // initial load
-  await Promise.all([loadNews(), loadClubs(), loadMatches(), renderStandings(), updateTicker(), updateStats()]);
+  // -------- safe initialisation (Promise.allSettled) --------
+  Promise.allSettled([
+    loadNews?.(),
+    loadClubs?.(),
+    loadMatches?.(),
+    renderStandings?.(),
+    updateTicker?.(),
+    updateStats?.()
+  ]).then(results => {
+    results.forEach(r => {
+      if(r.status === 'rejected'){
+        console.warn('Init item failed:', r.reason);
+        // If it's a permissions issue, poke user
+        try {
+          const msg = (r.reason && r.reason.message) ? r.reason.message.toLowerCase() : '';
+          if(msg.includes('permission') || msg.includes('insufficient')) {
+            showToast('Brak uprawnień Firestore — ustaw reguły w konsoli Firebase.');
+          }
+        } catch(e){}
+      }
+    });
+  }).catch(e => console.warn('Init allsettled catch', e));
 
-  // expose helpers for console debugging if needed
+  // expose helpers for debugging
   window.sr = { loadNews, loadClubs, loadMatches, renderStandings, updateTicker, updateStats };
 
+</script>
+
+<!-- Safety patch (extra): ensure modal hidden and block re-open on load -->
+<script>
+  (function(){
+    try {
+      document.addEventListener('DOMContentLoaded', function(){
+        const m = document.getElementById('panelModal');
+        if(m){ m.classList.add('hidden'); m.style.display = m.style.display || ''; }
+        const extra = document.getElementById('panelCloseExtra');
+        if(extra) extra.classList.add('hidden');
+      });
+      // Inline quick-close button fallback (works even if other scripts fail)
+      if(!document.getElementById('panelCloseInline')){
+        const btn = document.createElement('button');
+        btn.id = 'panelCloseInline';
+        btn.textContent = 'Zamknij panel (awaryjnie)';
+        btn.style.position = 'fixed'; btn.style.right='12px'; btn.style.bottom='12px'; btn.style.zIndex=20000;
+        btn.className = 'btn-ghost';
+        btn.onclick = function(){ const m=document.getElementById('panelModal'); if(m) m.classList.add('hidden'); try{ sessionStorage.removeItem('sr_admin'); }catch(e){} };
+        document.body.appendChild(btn);
+      }
+    } catch(e){ console.warn('safety patch setup error', e); }
+  })();
 </script>
 </body>
 </html>
