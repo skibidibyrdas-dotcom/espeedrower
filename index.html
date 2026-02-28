@@ -294,8 +294,14 @@
   const showBtns = document.querySelectorAll('[data-show]');
   const views = document.querySelectorAll('.view');
   const openPanelBtn = document.getElementById('openPanelBtn');
-  const panelModal = document.getElementById('panelModal');
-  const closePanel = document.getElementById('closePanel');
+ const panelModal = document.getElementById('panelModal');
+const closePanel = document.getElementById('closePanel');
+
+if (closePanel && panelModal) {
+  closePanel.addEventListener('click', function () {
+    panelModal.classList.add('hidden');
+  });
+}
   const loginBtn = document.getElementById('loginBtn');
   const adminPassInput = document.getElementById('adminPass');
   const loginWrap = document.getElementById('loginWrap');
