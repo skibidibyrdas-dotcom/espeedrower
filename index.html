@@ -50,7 +50,7 @@
   .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:800;border:1px solid rgba(255,255,255,0.02)}
   .fancyTitle{background:linear-gradient(90deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}
   .footer{color:var(--muted);text-align:center;margin:18px 0}
-  .hidden{display:none}
+  .hidden{display:none !important}
   #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:30px;background:linear-gradient(90deg,var(--g1),var(--g2));color:#071011;padding:12px 18px;border-radius:999px;box-shadow:0 12px 40px rgba(0,0,0,0.5);display:none;z-index:20000}
   #confetti{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:20000}
   .club-card{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
@@ -60,9 +60,13 @@
   th,td{padding:8px;border-bottom:1px dashed rgba(255,255,255,0.03);text-align:left}
   th{color:var(--muted);font-weight:700}
   .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:12px}
-  .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999}
-  .modal-box{background:var(--card);Padding:16px;border-radius:12px;max-width:980px;width:94%;max-height:90%;overflow:auto;border:1px solid var(--glass)}
-  #panelCloseExtra{position:fixed;right:18px;bottom:18px;z-index:99999}
+
+  /* modal basics */
+  .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:9999}
+  .modal[aria-hidden="false"]{display:flex}
+  .modal-box{background:var(--card);padding:16px;border-radius:12px;max-width:980px;width:94%;max-height:90%;overflow:auto;border:1px solid var(--glass)}
+  /* small responsive tweak */
+  @media(max-width:520px){ .modal-box{width:96%;padding:12px} }
 </style>
 </head>
 <body>
@@ -181,9 +185,7 @@
         <h4 style="margin:0">Backup</h4>
         <div style="margin-top:8px" class="small">Eksport/Import JSON z bazy (kopie zapasowe).</div>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <!-- main export (available to anyone clicking) -->
           <button id="exportAllMain" class="btn" type="button">Eksport</button>
-          <!-- NOTE: import removed from public aside — import is only in admin panel -->
         </div>
       </div>
     </aside>
@@ -193,11 +195,11 @@
 </div>
 
 <!-- Panel Modal -->
-<div id="panelModal" class="modal hidden" aria-hidden>
-  <div class="modal-box">
+<div id="panelModal" class="modal" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
-        <strong style="color:var(--g1)">Panel organizatora</strong>
+        <strong id="panelTitle" style="color:var(--g1)">Panel organizatora</strong>
         <div class="small">Wpisz hasło, aby zarządzać</div>
       </div>
       <div><button id="closePanel" class="btn-ghost" type="button">Zamknij</button></div>
@@ -251,7 +253,6 @@
       <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
 
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <!-- admin export + admin import only -->
         <button id="exportAllAdmin" class="btn" type="button">Eksport (JSON)</button>
         <label class="btn-ghost" style="cursor:pointer;padding:8px 10px;border-radius:8px">Import<input id="importAllAdmin" type="file" accept=".json" style="display:none"/></label>
       </div>
@@ -264,378 +265,437 @@
 
 <!-- App logic + Firebase -->
 <script type="module">
-  // ---------- ADMIN PASS ----------
-  const ADMIN_PASS = 'Speedrower';
-  // ---------------------------------
+/* ========= CONFIG ========== */
+const ADMIN_PASS = 'Speedrower';
 
-  // Firebase imports
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-  import { getStorage, ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
+/* Firebase (unchanged) */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { getStorage, ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
 
-  // ------------------ Twój firebaseConfig ------------------
-  // Note: storageBucket corrected to typical appspot domain (if your real bucket is different, revert)
-  const firebaseConfig = {
-    apiKey: "AIzaSyDNi83_zoH8cDSpYoTS4XtoGLPDKnypG1A",
-    authDomain: "speedrower-junior-league.firebaseapp.com",
-    projectId: "speedrower-junior-league",
-    storageBucket: "speedrower-junior-league.appspot.com",
-    messagingSenderId: "151487950214",
-    appId: "1:151487950214:web:54742c6cae06f267661007",
-    measurementId: "G-BTW6P3QMS3"
+const firebaseConfig = {
+  apiKey: "AIzaSyDNi83_zoH8cDSpYoTS4XtoGLPDKnypG1A",
+  authDomain: "speedrower-junior-league.firebaseapp.com",
+  projectId: "speedrower-junior-league",
+  storageBucket: "speedrower-junior-league.appspot.com",
+  messagingSenderId: "151487950214",
+  appId: "1:151487950214:web:54742c6cae06f267661007",
+  measurementId: "G-BTW6P3QMS3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+/* ========= UI refs (will be initialized on DOMContentLoaded) ========= */
+let refs = {};
+
+/* ========= Helpers ========= */
+function el(id){ return document.getElementById(id); }
+function showToast(msg, t = 3500){ const to = refs.toast; if(!to) return; to.textContent = msg; to.style.display = 'block'; setTimeout(()=> to.style.display = 'none', t); }
+function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
+function uid(p='id'){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* confetti (unchanged) */
+function popConfetti(){
+  const c = refs.confetti;
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  c.width = innerWidth; c.height = innerHeight;
+  const pieces = Array.from({length:60}).map(()=>(({
+    x: Math.random()*c.width, y: -20 - Math.random()*200, vx: (Math.random()-0.5)*6, vy: 2+Math.random()*6,
+    w: 6+Math.random()*10, h: 6+Math.random()*10, col: Math.random()>0.5 ? '#7ff08a' : '#b070ff', rot: Math.random()*360
+  })));
+  let t=0;
+  const raf = ()=> {
+    t++; ctx.clearRect(0,0,c.width,c.height);
+    pieces.forEach(p=>{ p.x += p.vx; p.y += p.vy; p.vy += 0.12; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot * Math.PI/180); ctx.fillStyle = p.col; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); });
+    if(t<160) requestAnimationFrame(raf); else ctx.clearRect(0,0,c.width,c.height);
   };
-  // ---------------------------------------------------------
+  raf();
+}
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
-
-  // UI refs
-  const showBtns = document.querySelectorAll('[data-show]');
-  const views = document.querySelectorAll('.view');
-  const openPanelBtn = document.getElementById('openPanelBtn');
- const panelModal = document.getElementById('panelModal');
-const closePanel = document.getElementById('closePanel');
-  const loginBtn = document.getElementById('loginBtn');
-  const adminPassInput = document.getElementById('adminPass');
-  const loginWrap = document.getElementById('loginWrap');
-  const adminControls = document.getElementById('adminControls');
-  const toast = document.getElementById('toast');
-  const confettiCanv = document.getElementById('confetti');
-  
-  // nav handlers
-  showBtns.forEach(b=> b.addEventListener('click', ()=> {
-    const id = b.dataset.show;
-    views.forEach(v=> v.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-    window.scrollTo({top:0,behavior:'smooth'});
-  }));
-  views.forEach(v=> v.classList.add('hidden'));
-  document.getElementById('home').classList.remove('hidden');
-
-  // panel open/close
-  openPanelBtn.addEventListener('click', ()=> {
-    panelModal.classList.remove('hidden');
-    if(sessionStorage.getItem('sr_admin')==='1') showAdmin(true);
-  });
-  closePanel.addEventListener('click', ()=> panelModal.classList.add('hidden'));
-
-  function showAdmin(on){
-    if(on){
-      adminControls.classList.remove('hidden');
-      loginWrap.classList.add('hidden');
-      sessionStorage.setItem('sr_admin','1');
-    } else {
-      adminControls.classList.add('hidden');
-      loginWrap.classList.remove('hidden');
-      sessionStorage.removeItem('sr_admin');
-    }
+/* upload helper (unchanged) */
+async function uploadFiles(files){
+  if(!files || files.length===0) return [];
+  const urls = [];
+  for(const f of files){
+    const path = `news_images/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${f.name}`;
+    const ref = sref(storage, path);
+    await uploadBytes(ref, f);
+    const url = await getDownloadURL(ref);
+    urls.push(url);
   }
+  return urls;
+}
 
-  // Safety: global handlers to avoid UI freeze if FB throws permission errors
-  window.addEventListener('unhandledrejection', function(ev){
-    console.warn('Unhandled rejection (suppressed):', ev.reason);
-    try { showToast('Problem z serwerem / uprawnieniami. Sprawdź reguły Firestore.'); } catch(e){}
-    ev.preventDefault();
-  });
-  window.addEventListener('error', function(ev){
-    console.error('Global error (suppressed):', ev.error || ev.message);
-  });
-
-  // DOM robust handlers
-  document.addEventListener('DOMContentLoaded', ()=> {
-    if(loginBtn){
-      loginBtn.addEventListener('click', ()=> {
-        const v = (adminPassInput.value||'').trim();
-        if(!v) return alert('Wpisz hasło.');
-        if(v === ADMIN_PASS){
-          adminPassInput.value = '';
-          showAdmin(true);
-          showToast('Panel odblokowany');
-        } else alert('Błędne hasło.');
-      });
-    }
-
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape' || e.key === 'Esc'){
-        if(!panelModal.classList.contains('hidden')) panelModal.classList.add('hidden');
-    
-      }
-    });
-    panelModal.addEventListener('click', (e)=> { if(e.target === panelModal) panelModal.classList.add('hidden'); });
-
-  });
-
-  // helpers
-  function showToast(msg, t=3500){ toast.textContent = msg; toast.style.display='block'; setTimeout(()=> toast.style.display='none', t); }
-  function escapeHtml(s){ if(!s) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
-  function uid(p='id'){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-
-  // confetti
-  function popConfetti(){
-    const c = confettiCanv; const ctx = c.getContext('2d');
-    c.width = innerWidth; c.height = innerHeight;
-    const pieces = Array.from({length:60}).map(()=>({
-      x: Math.random()*c.width, y: -20 - Math.random()*200, vx: (Math.random()-0.5)*6, vy: 2+Math.random()*6,
-      w: 6+Math.random()*10, h: 6+Math.random()*10, col: Math.random()>0.5 ? '#7ff08a' : '#b070ff', rot: Math.random()*360
-    }));
-    let t=0;
-    const raf = ()=> {
-      t++; ctx.clearRect(0,0,c.width,c.height);
-      pieces.forEach(p=>{ p.x += p.vx; p.y += p.vy; p.vy += 0.12; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot * Math.PI/180); ctx.fillStyle = p.col; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); });
-      if(t<160) requestAnimationFrame(raf); else ctx.clearRect(0,0,c.width,c.height);
-    };
-    raf();
-  }
-
-  // upload helper
-  async function uploadFiles(files){
-    if(!files || files.length===0) return [];
-    const urls = [];
-    for(const f of files){
-      const path = `news_images/${Date.now()}_${Math.random().toString(36).slice(2,8)}_${f.name}`;
-      const ref = sref(storage, path);
-      await uploadBytes(ref, f);
-      const url = await getDownloadURL(ref);
-      urls.push(url);
-    }
-    return urls;
-  }
-
-  // ---------- NEWS ----------
-  const newsList = document.getElementById('newsList');
-  async function loadNews(){
-    try{
-      newsList.innerHTML = 'Ładowanie...';
-      const q = query(collection(db,'aktualnosci'), orderBy('createdAt','desc'));
-      const snap = await getDocs(q);
-      newsList.innerHTML = '';
-      if(snap.empty){ newsList.innerHTML = '<div class="small">Brak aktualności.</div>'; return; }
-      snap.forEach(d=>{
-        const n = d.data();
-        const date = n.createdAt && n.createdAt.toDate ? n.createdAt.toDate().toLocaleString() : (n.date||'');
-        const div = document.createElement('div'); div.className='news-item';
-        let imgs = '';
-        if(n.images && n.images.length) imgs = '<div class="news-images">' + n.images.map(u=> `<img src="${u}" onclick="window.open('${u}','_blank')">`).join('') + '</div>';
-        div.innerHTML = `<strong>${escapeHtml(n.title)}</strong><div class="small">${date}${n.author?(' • '+escapeHtml(n.author)):""}</div><div style="margin-top:8px">${escapeHtml(n.content)}</div>${imgs}`;
-        newsList.appendChild(div);
-      });
-    } catch(e){
-      console.error('loadNews error', e);
-      newsList.innerHTML = '<div class="small">Błąd wczytywania aktualności. Sprawdź uprawnienia Firestore.</div>';
-      throw e;
-    }
-  }
-
-  // add news
-  document.getElementById('addNews').addEventListener('click', async ()=>{
-    if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem w panelu.');
-    const title = document.getElementById('newsTitle').value.trim();
-    const content = document.getElementById('newsContent').value.trim();
-    const files = document.getElementById('newsFiles').files;
-    if(!title || !content) return alert('Wypełnij tytuł i treść.');
-    const btn = document.getElementById('addNews'); btn.disabled=true; btn.textContent='Dodawanie...';
-    try {
-      const imgs = await uploadFiles(files);
-      await addDoc(collection(db,'aktualnosci'), { title, content, images: imgs, author: 'Organizer (hasło)', createdAt: serverTimestamp() });
-      document.getElementById('newsTitle').value=''; document.getElementById('newsContent').value=''; document.getElementById('newsFiles').value='';
-      showToast('Aktualność dodana'); popConfetti(); await loadNews(); await updateTicker(); await updateStats();
-    } catch(e){ alert('Błąd: '+(e.message||e)); console.error(e); } finally { btn.disabled=false; btn.textContent='Dodaj aktualność'; }
-  });
-
-  // ---------- CLUBS ----------
-// ---------- CLUBS ----------
-const clubsList = document.getElementById('clubsList');
+/* ========= Club rendering/filtering (cleaned) ========= */
 let clubsCache = [];
-
 function renderClubs(arr){
-  clubsList.innerHTML = '';
-  if(!arr.length){
-    clubsList.innerHTML = '<div class="small">Brak klubów dopasowanych do wyszukiwania.</div>';
+  const list = refs.clubsList;
+  list.innerHTML = '';
+  if(!arr || arr.length === 0){
+    list.innerHTML = '<div class="small">Brak klubów dopasowanych do wyszukiwania.</div>';
     return;
   }
-
   arr.forEach(c=>{
     const div = document.createElement('div');
-    div.className='club-card';
-
+    div.className = 'club-card';
     div.innerHTML = `
       <strong>${escapeHtml(c.name)}</strong>
       <div class="small">${escapeHtml(c.city||'')} ${c.short?('• '+escapeHtml(c.short)):""}</div>
       <div style="margin-top:6px" class="small">${(c.categories||[]).join(', ')}</div>
-
       ${c.description ? `<div style="margin-top:8px">${escapeHtml(c.description)}</div>` : ''}
-
-      ${c.achievements?.length ? `
-        <div style="margin-top:8px">
-          <strong>Osiągnięcia:</strong>
-          <div class="small">${escapeHtml(c.achievements.join(', '))}</div>
-        </div>` : ''}
-
-      ${c.roster?.length ? `
-        <div style="margin-top:8px">
-          <strong>Skład:</strong>
-          <div class="small">${escapeHtml(c.roster.join(', '))}</div>
-        </div>` : ''}
+      ${c.achievements?.length ? `<div style="margin-top:8px"><strong>Osiągnięcia:</strong><div class="small">${escapeHtml(c.achievements.join(', '))}</div></div>` : ''}
+      ${c.roster?.length ? `<div style="margin-top:8px"><strong>Skład:</strong><div class="small">${escapeHtml(c.roster.join(', '))}</div></div>` : ''}
     `;
-
-    clubsList.appendChild(div);
+    list.appendChild(div);
   });
 }
 
 async function loadClubs(){
   try{
-    clubsList.innerHTML = '';
+    refs.clubsList.innerHTML = '';
     clubsCache = [];
     const snap = await getDocs(collection(db,'kluby'));
-
-    if(snap.empty){
-      clubsList.innerHTML = '<div class="small">Brak klubów.</div>';
-      return;
-    }
-
-    snap.forEach(s=>{
-      const c = s.data();
-      c._id = s.id;
-      clubsCache.push(c);
-    });
-
+    if(snap.empty){ refs.clubsList.innerHTML = '<div class="small">Brak klubów.</div>'; return; }
+    snap.forEach(s => { const c = s.data(); c._id = s.id; clubsCache.push(c); });
     renderClubs(clubsCache);
-
   } catch(e){
     console.error('loadClubs error', e);
-    clubsList.innerHTML = '<div class="small">Błąd wczytywania klubów.</div>';
-    throw e;
+    refs.clubsList.innerHTML = '<div class="small">Błąd wczytywania klubów.</div>';
   }
 }
 
-document.getElementById('clubSearch').addEventListener('input', applyClubFilter);
-document.getElementById('clubFilter').addEventListener('change', applyClubFilter);
-
 function applyClubFilter(){
-  const q = (document.getElementById('clubSearch').value||'').toLowerCase().trim();
-  const cat = document.getElementById('clubFilter').value;
-
+  const q = (refs.clubSearch.value||'').toLowerCase().trim();
+  const cat = refs.clubFilter.value;
   let res = clubsCache.slice();
-
-  if(cat) res = res.filter(c=> (c.categories||[]).includes(cat));
-  if(q) res = res.filter(c=>
+  if(cat) res = res.filter(c => (c.categories||[]).includes(cat));
+  if(q) res = res.filter(c =>
     (c.name||'').toLowerCase().includes(q) ||
     (c.city||'').toLowerCase().includes(q) ||
     (c.short||'').toLowerCase().includes(q)
   );
-
   renderClubs(res);
 }
 
-  // ---------- MATCHES ----------
-  const scheduleList = document.getElementById('scheduleList');
-  async function loadMatches(){
-    try{
-      scheduleList.innerHTML = '';
-      const snap = await getDocs(query(collection(db,'mecze'), orderBy('date','asc')));
-      if(snap.empty){ scheduleList.innerHTML = '<div class="small">Brak meczów.</div>'; return; }
-      const table = document.createElement('table'); table.className='table';
-      table.innerHTML = '<thead><tr><th>Data</th><th>Godz.</th><th>Mecz</th><th>Kategoria</th><th>Miejsce</th><th>Wynik</th><th>Akcje</th></tr></thead>';
-      const tb = document.createElement('tbody');
-      snap.forEach(s=>{
-        const m = s.data();
-        const tr = document.createElement('tr');
-        const res = (typeof m.homeGoals==='number' && typeof m.awayGoals==='number') ? `${m.homeGoals} : ${m.awayGoals}` : '-';
-        tr.innerHTML = `<td>${escapeHtml(m.date||'')}</td><td>${escapeHtml(m.time||'')}</td><td>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</td><td>${escapeHtml(m.category||'')}</td><td>${escapeHtml(m.place||'')}</td><td>${res}</td><td></td>`;
-        const td = tr.querySelector('td:last-child');
-        if(sessionStorage.getItem('sr_admin')==='1'){
-          const del = document.createElement('button'); del.className='btn-ghost'; del.textContent='Usuń'; del.type='button';
-          del.onclick = async ()=> { if(confirm('Usunąć mecz?')){ await deleteDoc(doc(db,'mecze',s.id)); await loadMatches(); await renderStandings(); await updateTicker(); } };
-          td.appendChild(del);
-        }
-        tb.appendChild(tr);
-      });
-      table.appendChild(tb); scheduleList.appendChild(table);
-    } catch(e){
-      console.error('loadMatches error', e);
-      scheduleList.innerHTML = '<div class="small">Błąd wczytywania terminarza. Sprawdź uprawnienia Firestore.</div>';
-      throw e;
-    }
+/* ========= News / Matches / Standings / Ticker (kept behavior) ========= */
+const newsList = () => refs.newsList;
+async function loadNews(){
+  try{
+    refs.newsList.innerHTML = 'Ładowanie...';
+    const q = query(collection(db,'aktualnosci'), orderBy('createdAt','desc'));
+    const snap = await getDocs(q);
+    refs.newsList.innerHTML = '';
+    if(snap.empty){ refs.newsList.innerHTML = '<div class="small">Brak aktualności.</div>'; return; }
+    snap.forEach(d=>{
+      const n = d.data();
+      const date = n.createdAt && n.createdAt.toDate ? n.createdAt.toDate().toLocaleString() : (n.date||'');
+      const div = document.createElement('div'); div.className='news-item';
+      let imgs = '';
+      if(n.images && n.images.length) imgs = '<div class="news-images">' + n.images.map(u=> `<img src="${u}" onclick="window.open('${u}','_blank')">`).join('') + '</div>';
+      div.innerHTML = `<strong>${escapeHtml(n.title)}</strong><div class="small">${date}${n.author?(' • '+escapeHtml(n.author)):""}</div><div style="margin-top:8px">${escapeHtml(n.content)}</div>${imgs}`;
+      refs.newsList.appendChild(div);
+    });
+  } catch(e){
+    console.error('loadNews error', e);
+    refs.newsList.innerHTML = '<div class="small">Błąd wczytywania aktualności. Sprawdź uprawnienia Firestore.</div>';
   }
+}
 
-  document.getElementById('saveMatch').addEventListener('click', async ()=>{
-    if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.');
-    const date = document.getElementById('matchDate').value;
-    const time = document.getElementById('matchTime').value;
-    const home = document.getElementById('matchHome').value.trim();
-    const away = document.getElementById('matchAway').value.trim();
-    const place = document.getElementById('matchPlace').value.trim();
-    const cat = document.getElementById('matchCat').value;
-    const hg = document.getElementById('matchHomeGoals').value;
-    const ag = document.getElementById('matchAwayGoals').value;
-    if(!date || !home || !away) return alert('Wypełnij datę, gospodarza i gościa.');
-    const data = { date, time, home, away, place, category:cat, homeGoals: hg===''?null: Number(hg), awayGoals: ag===''?null: Number(ag), createdAt: serverTimestamp(), author: 'Organizer (hasło)' };
-    try { await addDoc(collection(db,'mecze'), data); showToast('Mecz dodany'); await loadMatches(); await renderStandings(); await updateTicker(); } catch(e){ alert('Błąd: '+(e.message||e)); console.error(e); }
+/* Matches */
+async function loadMatches(){
+  try{
+    refs.scheduleList.innerHTML = '';
+    const snap = await getDocs(query(collection(db,'mecze'), orderBy('date','asc')));
+    if(snap.empty){ refs.scheduleList.innerHTML = '<div class="small">Brak meczów.</div>'; return; }
+    const table = document.createElement('table'); table.className='table';
+    table.innerHTML = '<thead><tr><th>Data</th><th>Godz.</th><th>Mecz</th><th>Kategoria</th><th>Miejsce</th><th>Wynik</th><th>Akcje</th></tr></thead>';
+    const tb = document.createElement('tbody');
+    snap.forEach(s=> {
+      const m = s.data();
+      const tr = document.createElement('tr');
+      const res = (typeof m.homeGoals==='number' && typeof m.awayGoals==='number') ? `${m.homeGoals} : ${m.awayGoals}` : '-';
+      tr.innerHTML = `<td>${escapeHtml(m.date||'')}</td><td>${escapeHtml(m.time||'')}</td><td>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</td><td>${escapeHtml(m.category||'')}</td><td>${escapeHtml(m.place||'')}</td><td>${res}</td><td></td>`;
+      const td = tr.querySelector('td:last-child');
+      if(sessionStorage.getItem('sr_admin')==='1'){
+        const del = document.createElement('button'); del.className='btn-ghost'; del.textContent='Usuń'; del.type='button';
+        del.onclick = async ()=> { if(confirm('Usunąć mecz?')){ await deleteDoc(doc(db,'mecze',s.id)); await loadMatches(); await renderStandings(); await updateTicker(); } };
+        td.appendChild(del);
+      }
+      tb.appendChild(tr);
+    });
+    table.appendChild(tb); refs.scheduleList.appendChild(table);
+  } catch(e){
+    console.error('loadMatches error', e);
+    refs.scheduleList.innerHTML = '<div class="small">Błąd wczytywania terminarza. Sprawdź uprawnienia Firestore.</div>';
+  }
+}
+
+/* Standings */
+async function renderStandings(){
+  try{
+    const el = refs.standingsList; el.innerHTML = '';
+    const clubsSnap = await getDocs(collection(db,'kluby'));
+    const matchesSnap = await getDocs(collection(db,'mecze'));
+    if(clubsSnap.empty || matchesSnap.empty){ el.innerHTML = '<div class="small">Brak danych do wyliczeń.</div>'; return; }
+    const map = {};
+    clubsSnap.forEach(c => { const d = c.data(); if(d.name) map[d.name] = { club: d.name, MP:0,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0 }; });
+    matchesSnap.forEach(mSnap => {
+      const m = mSnap.data();
+      if(typeof m.homeGoals!=='number' || typeof m.awayGoals!=='number') return;
+      if(!map[m.home] || !map[m.away]) return;
+      map[m.home].MP++; map[m.away].MP++;
+      map[m.home].GF += m.homeGoals; map[m.home].GA += m.awayGoals;
+      map[m.away].GF += m.awayGoals; map[m.away].GA += m.homeGoals;
+      if(m.homeGoals>m.awayGoals){ map[m.home].W++; map[m.home].P+=3; map[m.away].L++; }
+      else if(m.homeGoals<m.awayGoals){ map[m.away].W++; map[m.away].P+=3; map[m.home].L++; }
+      else { map[m.home].D++; map[m.away].D++; map[m.home].P++; map[m.away].P++; }
+    });
+    Object.values(map).forEach(r=> r.GD = r.GF - r.GA);
+    const sorted = Object.values(map).sort((a,b)=> (b.P - a.P) || (b.GD - a.GD) || (b.GF - a.GF));
+    const tbl = document.createElement('table'); tbl.className='table';
+    tbl.innerHTML = '<thead><tr><th>#</th><th>Klub</th><th>MP</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th></tr></thead>';
+    const tbody = document.createElement('tbody');
+    sorted.forEach((r,i)=> { const tr = document.createElement('tr'); tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.club)}</td><td>${r.MP}</td><td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td><td>${r.GF}</td><td>${r.GA}</td><td>${r.GD}</td>`; tbody.appendChild(tr); });
+    tbl.appendChild(tbody); refs.standingsList.appendChild(tbl);
+  } catch(e){
+    console.error('renderStandings error', e);
+    refs.standingsList.innerHTML = '<div class="small">Błąd przy wyliczaniu tabeli. Sprawdź reguły Firestore.</div>';
+  }
+}
+
+/* Ticker */
+async function updateTicker(){
+  try{
+    const snap = await getDocs(query(collection(db,'mecze'), orderBy('date','asc')));
+    const arr = [];
+    snap.forEach(s=> arr.push(s.data()));
+    const now = new Date();
+    const upcoming = arr.filter(m => { if(!m.date) return false; const d = new Date(m.date + 'T' + (m.time||'00:00')); return d >= now; }).sort((a,b)=> (a.date+(a.time||'')) > (b.date+(b.time||'')) ? 1 : -1);
+    if(upcoming.length===0) refs.tickerInner.textContent = 'Brak zaplanowanych meczów.';
+    else { const m = upcoming[0]; refs.tickerInner.innerHTML = `Najbliższy: <strong>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</strong> • ${escapeHtml(m.date)} ${escapeHtml(m.time||'')} • ${escapeHtml(m.place||'')}`; }
+  } catch(e){
+    console.error('updateTicker error', e);
+    refs.tickerInner.textContent = 'Błąd ładowania terminarza. Sprawdź uprawnienia Firestore.';
+  }
+}
+
+/* Export / Import (unchanged) */
+async function doExportAll(){
+  if(!confirm('Pobrać backup wszystkich kolekcji?')) return;
+  try {
+    const [klubySnap, meczeSnap, newsSnap] = await Promise.all([getDocs(collection(db,'kluby')), getDocs(collection(db,'mecze')), getDocs(collection(db,'aktualnosci'))]);
+    const data = { kluby: klubySnap.docs.map(d=>({id:d.id,data:d.data()})), mecze: meczeSnap.docs.map(d=>({id:d.id,data:d.data()})), aktualnosci: newsSnap.docs.map(d=>({id:d.id,data:d.data()})) };
+    const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'speedrower_backup.json'; a.click(); URL.revokeObjectURL(url);
+  } catch(e){ alert('Błąd eksportu: '+(e.message||e)); console.error(e); }
+}
+
+/* Stats animation */
+async function updateStats(){
+  try {
+    const [klubySnap, meczeSnap, newsSnap] = await Promise.all([getDocs(collection(db,'kluby')), getDocs(collection(db,'mecze')), getDocs(collection(db,'aktualnosci'))]);
+    animateCount(refs.statClubs, klubySnap.size);
+    animateCount(refs.statMatches, meczeSnap.size);
+    animateCount(refs.statNews, newsSnap.size);
+  } catch(e){ console.error('updateStats error', e); }
+}
+function animateCount(el, to){
+  const from = Number(el.textContent) || 0;
+  const dur = 700; const start = performance.now();
+  const raf = (t)=> {
+    const p = Math.min(1, (t-start)/dur);
+    el.textContent = Math.floor(from + (to-from)*p);
+    if(p<1) requestAnimationFrame(raf);
+  };
+  requestAnimationFrame(raf);
+}
+
+/* ========= ADMIN actions (save club, save match, add news, import) ========= */
+async function doAddNews(){
+  if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem w panelu.');
+  const title = refs.newsTitle.value.trim();
+  const content = refs.newsContent.value.trim();
+  const files = refs.newsFiles.files;
+  if(!title || !content) return alert('Wypełnij tytuł i treść.');
+  const btn = refs.addNews; btn.disabled=true; btn.textContent='Dodawanie...';
+  try {
+    const imgs = await uploadFiles(files);
+    await addDoc(collection(db,'aktualnosci'), { title, content, images: imgs, author: 'Organizer (hasło)', createdAt: serverTimestamp() });
+    refs.newsTitle.value=''; refs.newsContent.value=''; refs.newsFiles.value='';
+    showToast('Aktualność dodana'); popConfetti(); await loadNews(); await updateTicker(); await updateStats();
+  } catch(e){ alert('Błąd: '+(e.message||e)); console.error(e); } finally { btn.disabled=false; btn.textContent='Dodaj aktualność'; }
+}
+
+async function doSaveClub(){
+  if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.');
+  const name = refs.clubName.value.trim(); if(!name) return alert('Nazwa klubu wymagana.');
+  const data = {
+    name,
+    city: refs.clubCity.value.trim(),
+    short: refs.clubShort.value.trim(),
+    description: refs.clubDesc.value.trim(),
+    achievements: (refs.clubAchievements.value||'').split(',').map(s=>s.trim()).filter(Boolean),
+    roster: (refs.clubRoster.value||'').split(',').map(s=>s.trim()).filter(Boolean),
+    categories: Array.from(refs.clubCats.selectedOptions).map(o=>o.value),
+    createdAt: serverTimestamp(), author: 'Organizer (hasło)'
+  };
+  try { await addDoc(collection(db,'kluby'), data); showToast('Dodano klub'); clearClubForm(); await loadClubs(); await updateStats(); } catch(e){ alert('Błąd: '+(e.message||e)); console.error(e); }
+}
+function clearClubForm(){ refs.clubName.value=''; refs.clubCity.value=''; refs.clubShort.value=''; refs.clubDesc.value=''; refs.clubAchievements.value=''; refs.clubRoster.value=''; Array.from(refs.clubCats.options).forEach(o=>o.selected=false); }
+
+async function doSaveMatch(){
+  if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.');
+  const date = refs.matchDate.value;
+  const time = refs.matchTime.value;
+  const home = refs.matchHome.value.trim();
+  const away = refs.matchAway.value.trim();
+  const place = refs.matchPlace.value.trim();
+  const cat = refs.matchCat.value;
+  const hg = refs.matchHomeGoals.value;
+  const ag = refs.matchAwayGoals.value;
+  if(!date || !home || !away) return alert('Wypełnij datę, gospodarza i gościa.');
+  const data = { date, time, home, away, place, category:cat, homeGoals: hg===''?null: Number(hg), awayGoals: ag===''?null: Number(ag), createdAt: serverTimestamp(), author: 'Organizer (hasło)' };
+  try { await addDoc(collection(db,'mecze'), data); showToast('Mecz dodany'); await loadMatches(); await renderStandings(); await updateTicker(); } catch(e){ alert('Błąd: '+(e.message||e)); console.error(e); }
+}
+
+/* ========= Modal control (robust) ========= */
+function showPanel(open){
+  const m = refs.panelModal;
+  if(!m) return;
+  if(open){
+    m.setAttribute('aria-hidden','false');
+    sessionStorage.setItem('sr_admin', sessionStorage.getItem('sr_admin') === '1' ? '1' : '0'); // keep existing admin flag
+    // show admin controls if already logged
+    if(sessionStorage.getItem('sr_admin') === '1') {
+      refs.loginWrap.classList.add('hidden');
+      refs.adminControls.classList.remove('hidden');
+    }
+    // focus first input
+    setTimeout(()=> refs.adminPass && refs.adminPass.focus(), 60);
+  } else {
+    m.setAttribute('aria-hidden','true');
+    // also remove sr_admin if panel closed via explicit close (optional)
+    // sessionStorage.removeItem('sr_admin');
+  }
+}
+
+/* ========= Init & event wiring ========= */
+document.addEventListener('DOMContentLoaded', ()=> {
+  // populate refs
+  refs = {
+    openPanelBtn: el('openPanelBtn'),
+    panelModal: el('panelModal'),
+    closePanel: el('closePanel'),
+    loginBtn: el('loginBtn'),
+    adminPass: el('adminPass'),
+    loginWrap: el('loginWrap'),
+    adminControls: el('adminControls'),
+    toast: el('toast'),
+    confetti: el('confetti'),
+    newsList: el('newsList'),
+    clubsList: el('clubsList'),
+    clubSearch: el('clubSearch'),
+    clubFilter: el('clubFilter'),
+    scheduleList: el('scheduleList'),
+    standingsList: el('standingsList'),
+    tickerInner: el('tickerInner'),
+    statClubs: el('statClubs'),
+    statMatches: el('statMatches'),
+    statNews: el('statNews'),
+    // admin inputs/buttons
+    newsTitle: el('newsTitle'),
+    newsContent: el('newsContent'),
+    newsFiles: el('newsFiles'),
+    addNews: el('addNews'),
+    clubName: el('clubName'),
+    clubCity: el('clubCity'),
+    clubShort: el('clubShort'),
+    clubDesc: el('clubDesc'),
+    clubAchievements: el('clubAchievements'),
+    clubRoster: el('clubRoster'),
+    clubCats: el('clubCats'),
+    saveClub: el('saveClub'),
+    clearClub: el('clearClub'),
+    matchDate: el('matchDate'),
+    matchTime: el('matchTime'),
+    matchHome: el('matchHome'),
+    matchAway: el('matchAway'),
+    matchPlace: el('matchPlace'),
+    matchCat: el('matchCat'),
+    matchHomeGoals: el('matchHomeGoals'),
+    matchAwayGoals: el('matchAwayGoals'),
+    saveMatch: el('saveMatch'),
+    clearMatch: el('clearMatch'),
+    exportAllMain: el('exportAllMain'),
+    exportAllAdmin: el('exportAllAdmin'),
+    importAllAdmin: el('importAllAdmin'),
+  };
+
+  // basic nav show/hide
+  document.querySelectorAll('[data-show]').forEach(b => b.addEventListener('click', (ev) => {
+    const id = ev.currentTarget.dataset.show;
+    document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.getElementById('home').classList.remove('hidden');
+
+  // modal open
+  refs.openPanelBtn && refs.openPanelBtn.addEventListener('click', () => {
+    showPanel(true);
+    refs.panelModal.removeAttribute('data-blocked');
+    // if logged earlier, show admin controls
+    if(sessionStorage.getItem('sr_admin') === '1') {
+      refs.loginWrap.classList.add('hidden');
+      refs.adminControls.classList.remove('hidden');
+    } else {
+      refs.loginWrap.classList.remove('hidden');
+      refs.adminControls.classList.add('hidden');
+    }
   });
 
-  // ---------- STANDINGS ----------
-  async function renderStandings(){
-    const el = document.getElementById('standingsList'); el.innerHTML = '';
-    try {
-      const clubsSnap = await getDocs(collection(db,'kluby'));
-      const matchesSnap = await getDocs(collection(db,'mecze'));
-      if(clubsSnap.empty || matchesSnap.empty){ el.innerHTML = '<div class="small">Brak danych do wyliczeń.</div>'; return; }
-      const map = {};
-      clubsSnap.forEach(c => { const d = c.data(); if(d.name) map[d.name] = { club: d.name, MP:0,P:0,W:0,D:0,L:0,GF:0,GA:0,GD:0 }; });
-      matchesSnap.forEach(mSnap => {
-        const m = mSnap.data();
-        if(typeof m.homeGoals!=='number' || typeof m.awayGoals!=='number') return;
-        if(!map[m.home] || !map[m.away]) return;
-        map[m.home].MP++; map[m.away].MP++;
-        map[m.home].GF += m.homeGoals; map[m.home].GA += m.awayGoals;
-        map[m.away].GF += m.awayGoals; map[m.away].GA += m.homeGoals;
-        if(m.homeGoals>m.awayGoals){ map[m.home].W++; map[m.home].P+=3; map[m.away].L++; }
-        else if(m.homeGoals<m.awayGoals){ map[m.away].W++; map[m.away].P+=3; map[m.home].L++; }
-        else { map[m.home].D++; map[m.away].D++; map[m.home].P++; map[m.away].P++; }
-      });
-      Object.values(map).forEach(r=> r.GD = r.GF - r.GA);
-      const sorted = Object.values(map).sort((a,b)=> (b.P - a.P) || (b.GD - a.GD) || (b.GF - a.GF));
-      const tbl = document.createElement('table'); tbl.className='table';
-      tbl.innerHTML = '<thead><tr><th>#</th><th>Klub</th><th>MP</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th></tr></thead>';
-      const tbody = document.createElement('tbody');
-      sorted.forEach((r,i)=> { const tr = document.createElement('tr'); tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.club)}</td><td>${r.MP}</td><td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td><td>${r.GF}</td><td>${r.GA}</td><td>${r.GD}</td>`; tbody.appendChild(tr); });
-      tbl.appendChild(tbody); el.appendChild(tbl);
-    } catch(e){ el.innerHTML = '<div class="small">Błąd przy wyliczaniu tabeli. Sprawdź reguły Firestore.</div>'; console.error(e); throw e; }
-  }
+  // close button
+  refs.closePanel && refs.closePanel.addEventListener('click', ()=> showPanel(false));
 
-  // ---------- TICKER ----------
-  async function updateTicker(){
-    try {
-      const snap = await getDocs(query(collection(db,'mecze'), orderBy('date','asc')));
-      const arr = [];
-      snap.forEach(s=> arr.push(s.data()));
-      const now = new Date();
-      const upcoming = arr.filter(m => { if(!m.date) return false; const d = new Date(m.date + 'T' + (m.time||'00:00')); return d >= now; }).sort((a,b)=> (a.date+(a.time||'')) > (b.date+(b.time||'')) ? 1 : -1);
-      if(upcoming.length===0) document.getElementById('tickerInner').textContent = 'Brak zaplanowanych meczów.';
-      else { const m = upcoming[0]; document.getElementById('tickerInner').innerHTML = `Najbliższy: <strong>${escapeHtml(m.home)} — ${escapeHtml(m.away)}</strong> • ${escapeHtml(m.date)} ${escapeHtml(m.time||'')} • ${escapeHtml(m.place||'')}`; }
-    } catch(e){ document.getElementById('tickerInner').textContent = 'Błąd ładowania terminarza. Sprawdź uprawnienia Firestore.'; console.error(e); throw e; }
-  }
+  // overlay click closes when clicking the overlay (but not when clicking modal box)
+  refs.panelModal && refs.panelModal.addEventListener('click', (ev) => {
+    if(ev.target === refs.panelModal) showPanel(false);
+  });
 
-  // ---------- EXPORT / IMPORT ----------
-  // NOTE: we now have two export buttons with different ids (main + admin) and a single admin-only import
-  async function doExportAll(){
-    if(!confirm('Pobrać backup wszystkich kolekcji?')) return;
-    try {
-      const [klubySnap, meczeSnap, newsSnap] = await Promise.all([getDocs(collection(db,'kluby')), getDocs(collection(db,'mecze')), getDocs(collection(db,'aktualnosci'))]);
-      const data = { kluby: klubySnap.docs.map(d=>({id:d.id,data:d.data()})), mecze: meczeSnap.docs.map(d=>({id:d.id,data:d.data()})), aktualnosci: newsSnap.docs.map(d=>({id:d.id,data:d.data()})) };
-      const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'speedrower_backup.json'; a.click(); URL.revokeObjectURL(url);
-    } catch(e){ alert('Błąd eksportu: '+(e.message||e)); console.error(e); }
-  }
+  // Escape key closes
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' || e.key === 'Esc') {
+      if(refs.panelModal && refs.panelModal.getAttribute('aria-hidden') === 'false') {
+        showPanel(false);
+      }
+    }
+  });
 
-  const exportAllMainBtn = document.getElementById('exportAllMain');
-  if(exportAllMainBtn) exportAllMainBtn.addEventListener('click', doExportAll);
-  const exportAllAdminBtn = document.getElementById('exportAllAdmin');
-  if(exportAllAdminBtn) exportAllAdminBtn.addEventListener('click', doExportAll);
+  // login button
+  refs.loginBtn && refs.loginBtn.addEventListener('click', () => {
+    const v = (refs.adminPass.value||'').trim();
+    if(!v) return alert('Wpisz hasło.');
+    if(v === ADMIN_PASS){
+      refs.adminPass.value = '';
+      refs.loginWrap.classList.add('hidden');
+      refs.adminControls.classList.remove('hidden');
+      sessionStorage.setItem('sr_admin','1');
+      showToast('Panel odblokowany');
+    } else alert('Błędne hasło.');
+  });
 
-  // admin-only import handler:
-  document.getElementById('importAllAdmin').addEventListener('change', async (e)=>{
+  // admin actions wiring
+  refs.addNews && refs.addNews.addEventListener('click', doAddNews);
+  refs.saveClub && refs.saveClub.addEventListener('click', doSaveClub);
+  refs.clearClub && refs.clearClub.addEventListener('click', clearClubForm);
+  refs.saveMatch && refs.saveMatch.addEventListener('click', doSaveMatch);
+  refs.exportAllMain && refs.exportAllMain.addEventListener('click', doExportAll);
+  refs.exportAllAdmin && refs.exportAllAdmin.addEventListener('click', doExportAll);
+  refs.importAllAdmin && refs.importAllAdmin.addEventListener('change', async (e) => {
     if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.');
     const f = e.target.files[0]; if(!f) return;
     const txt = await f.text();
@@ -648,52 +708,32 @@ function applyClubFilter(){
     } catch(err){ alert('Błąd importu: '+(err.message||err)); console.error(err); }
   });
 
-  // stats animation
-  async function updateStats(){
-    try {
-      const [klubySnap, meczeSnap, newsSnap] = await Promise.all([getDocs(collection(db,'kluby')), getDocs(collection(db,'mecze')), getDocs(collection(db,'aktualnosci'))]);
-      animateCount(document.getElementById('statClubs'), klubySnap.size);
-      animateCount(document.getElementById('statMatches'), meczeSnap.size);
-      animateCount(document.getElementById('statNews'), newsSnap.size);
-    } catch(e){ console.error('updateStats error', e); throw e; }
-  }
-  function animateCount(el, to){
-    const from = Number(el.textContent) || 0;
-    const dur = 700; const start = performance.now();
-    const raf = (t)=> {
-      const p = Math.min(1, (t-start)/dur);
-      el.textContent = Math.floor(from + (to-from)*p);
-      if(p<1) requestAnimationFrame(raf);
-    };
-    requestAnimationFrame(raf);
-  }
+  // club search/filter wiring
+  refs.clubSearch && refs.clubSearch.addEventListener('input', applyClubFilter);
+  refs.clubFilter && refs.clubFilter.addEventListener('change', applyClubFilter);
 
-  // -------- safe initialisation (Promise.allSettled) --------
-  Promise.allSettled([
-    loadNews?.(),
-    loadClubs?.(),
-    loadMatches?.(),
-    renderStandings?.(),
-    updateTicker?.(),
-    updateStats?.()
-  ]).then(results => {
-    results.forEach(r => {
-      if(r.status === 'rejected'){
-        console.warn('Init item failed:', r.reason);
-        // If it's a permissions issue, poke user
-        try {
-          const msg = (r.reason && r.reason.message) ? r.reason.message.toLowerCase() : '';
-          if(msg.includes('permission') || msg.includes('insufficient')) {
-            showToast('Brak uprawnień Firestore — ustaw reguły w konsoli Firebase.');
-          }
-        } catch(e){}
-      }
+  // Prevent weird duplicate listeners or older code interference: ensure only our panel is visible handling
+  refs.panelModal.setAttribute('aria-hidden','true');
+
+  // init data (do not block the UI if some fetch fails)
+  Promise.allSettled([ loadNews(), loadClubs(), loadMatches(), renderStandings(), updateTicker(), updateStats() ])
+    .then(results => {
+      results.forEach(r => { if(r.status === 'rejected') console.warn('init failed:', r.reason); });
     });
-  }).catch(e => console.warn('Init allsettled catch', e));
 
-  // expose helpers for debugging
-  window.sr = { loadNews, loadClubs, loadMatches, renderStandings, updateTicker, updateStats };
+  // expose quick debug helpers
+  window.sr = { loadNews, loadClubs, loadMatches, renderStandings, updateTicker, updateStats, showPanel };
+});
 
+/* Global safety handlers to avoid UI freeze if FB throws permission errors */
+window.addEventListener('unhandledrejection', function(ev){
+  console.warn('Unhandled rejection (suppressed):', ev.reason);
+  try { document.getElementById('toast') && showToast('Problem z serwerem / uprawnieniami. Sprawdź reguły Firestore.'); } catch(e){}
+  ev.preventDefault();
+});
+window.addEventListener('error', function(ev){
+  console.error('Global error (suppressed):', ev.error || ev.message);
+});
 </script>
 </body>
 </html>
