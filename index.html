@@ -445,16 +445,11 @@
   });
 
   // ---------- CLUBS ----------
-  const clubsList = document.getElementById('clubsList');
-  let clubsCache = [];
-  async function loadClubs(){
-    try{
-      clubsList.innerHTML = '';
-      clubsCache = [];
-      const snap = await getDocs(collection(db,'kluby'));
-      if(snap.empty){ clubsList.innerHTML = '<div class="small">Brak klubów.</div>'; return; }
-      snap.forEach(s=> { const c = s.data(); c._id = s.id; clubsCache.push(c); });
-     function renderClubs(arr){
+// ---------- CLUBS ----------
+const clubsList = document.getElementById('clubsList');
+let clubsCache = [];
+
+function renderClubs(arr){
   clubsList.innerHTML = '';
   if(!arr.length){
     clubsList.innerHTML = '<div class="small">Brak klubów dopasowanych do wyszukiwania.</div>';
@@ -470,59 +465,69 @@
       <div class="small">${escapeHtml(c.city||'')} ${c.short?('• '+escapeHtml(c.short)):""}</div>
       <div style="margin-top:6px" class="small">${(c.categories||[]).join(', ')}</div>
 
-      ${c.description ? `
-        <div style="margin-top:8px">${escapeHtml(c.description)}</div>
-      ` : ''}
+      ${c.description ? `<div style="margin-top:8px">${escapeHtml(c.description)}</div>` : ''}
 
       ${c.achievements?.length ? `
         <div style="margin-top:8px">
           <strong>Osiągnięcia:</strong>
           <div class="small">${escapeHtml(c.achievements.join(', '))}</div>
-        </div>
-      ` : ''}
+        </div>` : ''}
 
       ${c.roster?.length ? `
         <div style="margin-top:8px">
           <strong>Skład:</strong>
           <div class="small">${escapeHtml(c.roster.join(', '))}</div>
-        </div>
-      ` : ''}
+        </div>` : ''}
     `;
 
     clubsList.appendChild(div);
   });
 }
 
-  // add club
-  document.getElementById('saveClub').addEventListener('click', async ()=>{
-    if(sessionStorage.getItem('sr_admin')!=='1') return alert('Zaloguj się hasłem.');
-    const name = document.getElementById('clubName').value.trim(); if(!name) return alert('Nazwa klubu wymagana.');
-    const data = {
-      name,
-      city: document.getElementById('clubCity').value.trim(),
-      short: document.getElementById('clubShort').value.trim(),
-      description: document.getElementById('clubDesc').value.trim(),
-      achievements: (document.getElementById('clubAchievements').value||'').split(',').map(s=>s.trim()).filter(Boolean),
-      roster: (document.getElementById('clubRoster').value||'').split(',').map(s=>s.trim()).filter(Boolean),
-      categories: Array.from(document.getElementById('clubCats').selectedOptions).map(o=>o.value),
-      createdAt: serverTimestamp(), author: 'Organizer (hasło)'
-    };
-    try { await addDoc(collection(db,'kluby'), data); showToast('Dodano klub'); clearClubForm(); await loadClubs(); await updateStats(); } catch(e){ alert('Błąd: '+(e.message||e)); console.error(e); }
-  });
+async function loadClubs(){
+  try{
+    clubsList.innerHTML = '';
+    clubsCache = [];
+    const snap = await getDocs(collection(db,'kluby'));
 
-  function clearClubForm(){ document.getElementById('clubName').value=''; document.getElementById('clubCity').value=''; document.getElementById('clubShort').value=''; document.getElementById('clubDesc').value=''; document.getElementById('clubAchievements').value=''; document.getElementById('clubRoster').value=''; Array.from(document.getElementById('clubCats').options).forEach(o=>o.selected=false); }
-  document.getElementById('clearClub').addEventListener('click', clearClubForm);
+    if(snap.empty){
+      clubsList.innerHTML = '<div class="small">Brak klubów.</div>';
+      return;
+    }
 
-  document.getElementById('clubSearch').addEventListener('input', ()=> applyClubFilter());
-  document.getElementById('clubFilter').addEventListener('change', ()=> applyClubFilter());
-  function applyClubFilter(){
-    const q = (document.getElementById('clubSearch').value||'').toLowerCase().trim();
-    const cat = document.getElementById('clubFilter').value;
-    let res = clubsCache.slice();
-    if(cat) res = res.filter(c=> (c.categories||[]).includes(cat));
-    if(q) res = res.filter(c=> (c.name||'').toLowerCase().includes(q) || (c.city||'').toLowerCase().includes(q) || (c.short||'').toLowerCase().includes(q));
-    renderClubs(res);
+    snap.forEach(s=>{
+      const c = s.data();
+      c._id = s.id;
+      clubsCache.push(c);
+    });
+
+    renderClubs(clubsCache);
+
+  } catch(e){
+    console.error('loadClubs error', e);
+    clubsList.innerHTML = '<div class="small">Błąd wczytywania klubów.</div>';
+    throw e;
   }
+}
+
+document.getElementById('clubSearch').addEventListener('input', applyClubFilter);
+document.getElementById('clubFilter').addEventListener('change', applyClubFilter);
+
+function applyClubFilter(){
+  const q = (document.getElementById('clubSearch').value||'').toLowerCase().trim();
+  const cat = document.getElementById('clubFilter').value;
+
+  let res = clubsCache.slice();
+
+  if(cat) res = res.filter(c=> (c.categories||[]).includes(cat));
+  if(q) res = res.filter(c=>
+    (c.name||'').toLowerCase().includes(q) ||
+    (c.city||'').toLowerCase().includes(q) ||
+    (c.short||'').toLowerCase().includes(q)
+  );
+
+  renderClubs(res);
+}
 
   // ---------- MATCHES ----------
   const scheduleList = document.getElementById('scheduleList');
