@@ -296,20 +296,13 @@
   const openPanelBtn = document.getElementById('openPanelBtn');
  const panelModal = document.getElementById('panelModal');
 const closePanel = document.getElementById('closePanel');
-
-if (closePanel && panelModal) {
-  closePanel.addEventListener('click', function () {
-    panelModal.classList.add('hidden');
-  });
-}
   const loginBtn = document.getElementById('loginBtn');
   const adminPassInput = document.getElementById('adminPass');
   const loginWrap = document.getElementById('loginWrap');
   const adminControls = document.getElementById('adminControls');
   const toast = document.getElementById('toast');
   const confettiCanv = document.getElementById('confetti');
-  const panelCloseExtra = document.getElementById('panelCloseExtra');
-
+  
   // nav handlers
   showBtns.forEach(b=> b.addEventListener('click', ()=> {
     const id = b.dataset.show;
